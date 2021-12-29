@@ -6,13 +6,13 @@ interface UIProps {
 	text: string;
 }
 interface UIState {
-	backgroundColor: Color3;
+	clickToggle: boolean;
 }
 
 class Button extends Roact.Component<UIProps, UIState> {
 	textButtonRef: Roact.Ref<TextButton>;
 	state = {
-		backgroundColor: Color3.fromRGB(200, 0, 0),
+		clickToggle: false,
 	};
 
 	constructor(props: UIProps) {
@@ -28,7 +28,7 @@ class Button extends Roact.Component<UIProps, UIState> {
 					TextScaled={true}
 					Position={new UDim2(0.4, 0, 0.1, 0)}
 					Size={new UDim2(0.2, 0, 0.1, 0)}
-					BackgroundColor3={this.state.backgroundColor}
+					BackgroundColor3={Color3.fromRGB(200, 0, 0)}
 					BackgroundTransparency={0}
 					Ref={this.textButtonRef}
 					AutoButtonColor={false}
@@ -42,10 +42,6 @@ class Button extends Roact.Component<UIProps, UIState> {
 								{ BackgroundColor3: Color3.fromRGB(255, 0, 0) },
 							);
 							tween.Play();
-							wait(0.2);
-							this.setState({
-								backgroundColor: Color3.fromRGB(255, 0, 0),
-							});
 						},
 						MouseLeave: () => {
 							const textButton = this.textButtonRef.getValue() as TextButton;
@@ -55,10 +51,12 @@ class Button extends Roact.Component<UIProps, UIState> {
 								{ BackgroundColor3: Color3.fromRGB(220, 0, 0) },
 							);
 							tween.Play();
-							wait(0.2);
+						},
+						MouseButton1Click: () => {
 							this.setState({
-								backgroundColor: Color3.fromRGB(220, 0, 0),
+								clickToggle: !this.state.clickToggle,
 							});
+							this.props.text = this.state.clickToggle ? "Kate Kane" : "Ryan Wilder";
 						},
 					}}
 				/>
@@ -69,8 +67,8 @@ class Button extends Roact.Component<UIProps, UIState> {
 	didMount() {
 		const textButton = this.textButtonRef.getValue() as TextButton;
 		print(textButton);
-		textButton.GetPropertyChangedSignal("BackgroundColor3").Connect(() => {
-			print(`The new background color is: ${textButton.BackgroundColor3}`);
+		textButton.GetPropertyChangedSignal("Text").Connect(() => {
+			print(`${textButton.Text} is running the show!`);
 		});
 	}
 }
