@@ -1,4 +1,5 @@
-print("Hello world, from server!")
-print("Eating Pizza");
+local modules = {}
+modules.NewBatwoman = require(script.NewBatwoman)
 
-print("Having sex");
+batwoman = modules.NewBatwoman:new({Name = "Kate Kane"});
+batwoman:speak();
