@@ -1,5 +1,5 @@
 import { KnitClient as Knit } from "@rbxts/knit";
-import Store from "../Redux/ConfigureStore";
+import Store from "../Rodux/ConfigureStore";
 const LevelService = Knit.GetService("LevelService");
 
 const LevelClient = {
