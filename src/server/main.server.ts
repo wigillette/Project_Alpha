@@ -1,7 +1,3 @@
-import Batwoman from "./NewBatwoman";
+import LevelService from "./LevelService";
 
-const kate = new Batwoman("Kate Kane");
-kate.speak();
-
-const ryan = new Batwoman("Ryan Wilder");
-ryan.speak();
+LevelService.KnitInit();

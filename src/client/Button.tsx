@@ -8,54 +8,89 @@ interface UIProps {
 }
 
 let Button = (props: UIProps) => {
-	const textButtonRef = Roact.createRef<TextButton>();
+	const buttonRef = Roact.createRef<ImageButton>();
+	const frameRef = Roact.createRef<Frame>();
 	const onClick = props.onClick;
 	const text = props.text;
 	return (
 		<screengui ResetOnSpawn={false}>
-			<textbutton
-				Text={text}
-				TextScaled={true}
-				AnchorPoint={new Vector2(0.5, 0.2)}
+			<frame
+				BackgroundTransparency={1}
 				Position={new UDim2(0.5, 0, 0.2, 0)}
 				Size={new UDim2(0.2, 0, 0.1, 0)}
-				BackgroundColor3={Color3.fromRGB(200, 0, 0)}
-				BackgroundTransparency={0}
-				Ref={textButtonRef}
-				AutoButtonColor={false}
-				Font={"TitilliumWeb"}
+				Ref={frameRef}
+				AnchorPoint={new Vector2(0.5, 0.2)}
 				Event={{
 					MouseEnter: () => {
-						const textButton = textButtonRef.getValue() as TextButton;
-						EffectsHandler.tweenColor(textButton, Color3.fromRGB(255, 0, 0));
+						const button = buttonRef.getValue() as ImageButton;
+						const frame = frameRef.getValue() as Frame;
+						EffectsHandler.tweenImageColor(button, Color3.fromRGB(255, 0, 0));
 						EffectsHandler.tweenSize(
-							textButton,
+							frame,
 							new UDim2(
-								textButton.Size.X.Scale + 0.1,
-								textButton.Size.X.Offset,
-								textButton.Size.Y.Scale + 0.1,
-								textButton.Size.Y.Offset,
+								frame.Size.X.Scale + 0.1,
+								frame.Size.X.Offset,
+								frame.Size.Y.Scale + 0.1,
+								frame.Size.Y.Offset,
 							),
 							"enlarge",
 						);
 					},
 					MouseLeave: () => {
-						const textButton = textButtonRef.getValue() as TextButton;
-						EffectsHandler.tweenColor(textButton, Color3.fromRGB(200, 0, 0));
+						const button = buttonRef.getValue() as ImageButton;
+						const frame = frameRef.getValue() as Frame;
+						EffectsHandler.tweenImageColor(button, Color3.fromRGB(200, 0, 0));
 						EffectsHandler.tweenSize(
-							textButton,
+							frame,
 							new UDim2(
-								textButton.Size.X.Scale - 0.1,
-								textButton.Size.X.Offset,
-								textButton.Size.Y.Scale - 0.1,
-								textButton.Size.Y.Offset,
+								frame.Size.X.Scale - 0.1,
+								frame.Size.X.Offset,
+								frame.Size.Y.Scale - 0.1,
+								frame.Size.Y.Offset,
 							),
-							"shrink",
+							"enlarge",
 						);
 					},
-					MouseButton1Click: onClick,
 				}}
-			/>
+			>
+				<imagebutton
+					Image="http://www.roblox.com/asset/?id=5295627555"
+					AnchorPoint={new Vector2(0.5, 0.5)}
+					Position={new UDim2(0.5, 0, 0.5, 0)}
+					Size={new UDim2(1, 0, 1, 0)}
+					ImageColor3={Color3.fromRGB(200, 0, 0)}
+					BackgroundTransparency={1}
+					ZIndex={1}
+					Ref={buttonRef}
+					ScaleType={Enum.ScaleType.Slice}
+					SliceCenter={new Rect(10, 10, 10, 10)}
+					Event={{
+						MouseButton1Click: onClick,
+					}}
+				>
+					<textlabel
+						ZIndex={2}
+						Text={text}
+						TextScaled={true}
+						Font={"TitilliumWeb"}
+						BackgroundTransparency={1}
+						Size={new UDim2(1, 0, 1, 0)}
+						AnchorPoint={new Vector2(0.5, 0.5)}
+						Position={new UDim2(0.5, 0, 0.5, 0)}
+					/>
+				</imagebutton>
+				<imagelabel
+					Image="http://www.roblox.com/asset/?id=5295627555"
+					AnchorPoint={new Vector2(0.5, 0.5)}
+					ZIndex={0}
+					Position={new UDim2(0.5, 0, 0.5, 3)}
+					Size={new UDim2(1, 0, 1, 0)}
+					ImageColor3={Color3.fromRGB(140, 0, 0)}
+					BackgroundTransparency={1}
+					ScaleType={Enum.ScaleType.Slice}
+					SliceCenter={new Rect(10, 10, 10, 10)}
+				></imagelabel>
+			</frame>
 		</screengui>
 	);
 };

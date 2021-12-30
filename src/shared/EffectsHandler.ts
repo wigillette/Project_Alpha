@@ -112,7 +112,7 @@ const EffectHandlers = {
 					"Out",
 					"Quad",
 					0.3,
-					true,
+					false,
 					undefined,
 				);
 				break;
@@ -127,7 +127,7 @@ const EffectHandlers = {
 					"Out",
 					"Quad",
 					0.3,
-					true,
+					false,
 					undefined,
 				);
 				break;
@@ -142,7 +142,7 @@ const EffectHandlers = {
 					"Out",
 					"Quad",
 					0.3,
-					true,
+					false,
 					undefined,
 				);
 				break;
@@ -157,7 +157,7 @@ const EffectHandlers = {
 					"Out",
 					"Quad",
 					0.3,
-					true,
+					false,
 					undefined,
 				);
 				break;
@@ -171,7 +171,7 @@ const EffectHandlers = {
 					"Out",
 					"Quad",
 					0.2,
-					true,
+					false,
 					undefined,
 				);
 				break;
@@ -186,7 +186,7 @@ const EffectHandlers = {
 					"Out",
 					"Quad",
 					0.2,
-					true,
+					false,
 					undefined,
 				);
 				break;
@@ -198,7 +198,7 @@ const EffectHandlers = {
 			"Out",
 			"Quad",
 			0.2,
-			true,
+			false,
 			undefined,
 		);
 	},
