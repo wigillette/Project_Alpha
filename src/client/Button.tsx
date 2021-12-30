@@ -9,7 +9,6 @@ interface UIProps {
 
 let Button = (props: UIProps) => {
 	const textButtonRef = Roact.createRef<TextButton>();
-	const textButton = textButtonRef.getValue() as TextButton;
 	const onClick = props.onClick;
 	const text = props.text;
 	return (
@@ -17,7 +16,8 @@ let Button = (props: UIProps) => {
 			<textbutton
 				Text={text}
 				TextScaled={true}
-				Position={new UDim2(0.4, 0, 0.1, 0)}
+				AnchorPoint={new Vector2(0.5, 0.2)}
+				Position={new UDim2(0.5, 0, 0.2, 0)}
 				Size={new UDim2(0.2, 0, 0.1, 0)}
 				BackgroundColor3={Color3.fromRGB(200, 0, 0)}
 				BackgroundTransparency={0}
@@ -26,10 +26,32 @@ let Button = (props: UIProps) => {
 				Font={"TitilliumWeb"}
 				Event={{
 					MouseEnter: () => {
+						const textButton = textButtonRef.getValue() as TextButton;
 						EffectsHandler.tweenColor(textButton, Color3.fromRGB(255, 0, 0));
+						EffectsHandler.tweenSize(
+							textButton,
+							new UDim2(
+								textButton.Size.X.Scale + 0.1,
+								textButton.Size.X.Offset,
+								textButton.Size.Y.Scale + 0.1,
+								textButton.Size.Y.Offset,
+							),
+							"enlarge",
+						);
 					},
 					MouseLeave: () => {
+						const textButton = textButtonRef.getValue() as TextButton;
 						EffectsHandler.tweenColor(textButton, Color3.fromRGB(200, 0, 0));
+						EffectsHandler.tweenSize(
+							textButton,
+							new UDim2(
+								textButton.Size.X.Scale - 0.1,
+								textButton.Size.X.Offset,
+								textButton.Size.Y.Scale - 0.1,
+								textButton.Size.Y.Offset,
+							),
+							"shrink",
+						);
 					},
 					MouseButton1Click: onClick,
 				}}

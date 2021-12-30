@@ -19,8 +19,4 @@ const buttonReducer = Rodux.createReducer(
 	},
 );
 
-const reducer = Rodux.combineReducers({
-	newName: buttonReducer,
-});
-
-export default reducer;
+export default buttonReducer;

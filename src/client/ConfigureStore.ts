@@ -1,5 +1,5 @@
 import Rodux from "@rbxts/rodux";
-import Reducer from "./Reducer";
+import Reducer from "./Reducers";
 
 const store = new Rodux.Store(Reducer);
 
