@@ -1,6 +1,6 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
-import { TweenService } from "@rbxts/services";
+import EffectsHandler from "../shared/EffectsHandler";
 
 interface UIProps {
 	text: string;
@@ -9,6 +9,7 @@ interface UIProps {
 
 let Button = (props: UIProps) => {
 	const textButtonRef = Roact.createRef<TextButton>();
+	const textButton = textButtonRef.getValue() as TextButton;
 	const onClick = props.onClick;
 	const text = props.text;
 	return (
@@ -25,22 +26,10 @@ let Button = (props: UIProps) => {
 				Font={"TitilliumWeb"}
 				Event={{
 					MouseEnter: () => {
-						const textButton = textButtonRef.getValue() as TextButton;
-						const tween = TweenService.Create(
-							textButton,
-							new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-							{ BackgroundColor3: Color3.fromRGB(255, 0, 0) },
-						);
-						tween.Play();
+						EffectsHandler.tweenColor(textButton, Color3.fromRGB(255, 0, 0));
 					},
 					MouseLeave: () => {
-						const textButton = textButtonRef.getValue() as TextButton;
-						const tween = TweenService.Create(
-							textButton,
-							new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-							{ BackgroundColor3: Color3.fromRGB(220, 0, 0) },
-						);
-						tween.Play();
+						EffectsHandler.tweenColor(textButton, Color3.fromRGB(200, 0, 0));
 					},
 					MouseButton1Click: onClick,
 				}}
