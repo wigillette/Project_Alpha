@@ -1,7 +1,7 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
 import Main from "./Components/Main";
-import Store from "./Redux/ConfigureStore";
+import Store from "./Rodux/ConfigureStore";
 import { Players } from "@rbxts/services";
 import LevelService from "./Services/LevelService";
 
