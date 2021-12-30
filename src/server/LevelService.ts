@@ -1,4 +1,4 @@
-import { KnitServer as Knit, Signal, RemoteProperty, RemoteSignal } from "@rbxts/knit";
+import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
 
 declare global {
@@ -47,9 +47,16 @@ const LevelService = Knit.CreateService({
 	},
 
 	KnitInit() {
+		/*
 		this.Client.GiveExp.Connect((player) => {
 			this.AddExp(player, 50);
 			print(`Gave ${player.Name} 50 exp`);
+		});
+		*/
+
+		Players.PlayerAdded.Connect((player) => {
+			print("Added Experience");
+			this.AddExp(player, 50);
 		});
 
 		Players.PlayerRemoving.Connect((player) => this.PlayerStats.delete(player));

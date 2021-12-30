@@ -6,26 +6,25 @@ interface profileState {
 	Experience: number;
 }
 
-interface Action<T = string, L = number, E = number, EC = number> {
-	type: T;
-	level: L;
-	experience: E;
-	experienceCap: EC;
+interface Action<S = string, T = {}> {
+	type: string;
+	payload?: { Level: number; Experience: number; ExperienceCap: number };
 }
 
 const profileReducer = Rodux.createReducer(
 	{ Level: 1, Experience: 0, ExperienceCap: 50 },
 	{
-		UpdateProfile: (
-			state: { Level: number; Experience: number; ExperienceCap: number },
-			action: Action<string, number, number, number>,
-		) => {
-			const newState: profileState = {
-				Level: action.level,
-				Experience: action.experience,
-				ExperienceCap: action.experienceCap,
-			};
+		updateProfile: (state: profileState, action: Action<string, {}>) => {
+			let newState: profileState = { Level: 1, Experience: 0, ExperienceCap: 50 };
+			if (action.payload) {
+				newState = {
+					Level: action.payload.Level,
+					Experience: action.payload.Experience,
+					ExperienceCap: action.payload.ExperienceCap,
+				};
+			}
 
+			print(newState);
 			return newState;
 		},
 	},
