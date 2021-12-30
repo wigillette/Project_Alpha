@@ -1,7 +1,6 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
 import { TweenService } from "@rbxts/services";
-import Store from "./ConfigureStore";
 
 interface UIProps {
 	text: string;
