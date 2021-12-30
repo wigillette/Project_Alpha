@@ -1,6 +1,6 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
-import EffectsHandler from "../shared/EffectsHandler";
+import EffectsHandler from "../../shared/EffectsHandler";
 
 interface UIProps {}
 

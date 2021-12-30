@@ -1,8 +1,9 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
-import Main from "./Main";
-import Store from "./ConfigureStore";
+import Main from "./Components/Main";
+import Store from "./Redux/ConfigureStore";
 import { Players } from "@rbxts/services";
+import LevelService from "./Services/LevelService";
 
 const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
@@ -17,3 +18,4 @@ const app = Roact.createElement(
 );
 
 Roact.mount(app, playerGui, "App");
+LevelService.init();

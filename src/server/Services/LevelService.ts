@@ -24,6 +24,7 @@ const LevelService = Knit.CreateService({
 
 	AddExp(Player: Player, Amount: number) {
 		if (Amount !== 0) {
+			print(`Adding ${Amount} experience to ${Player.Name}`);
 			const stats = this.GetStats(Player);
 			let exp = stats.Experience;
 			let level = stats.Level;
@@ -32,7 +33,8 @@ const LevelService = Knit.CreateService({
 			exp += Amount;
 			if (exp >= expCap) {
 				level += 1;
-				expCap = math.pow(level, 1.5) * 50;
+				expCap = math.ceil(math.pow(level, 1.5) * 50);
+				print(`${Player.Name} has leveled up!`);
 			}
 
 			const newStats = { Experience: exp, Level: level, ExperienceCap: expCap };
@@ -53,13 +55,17 @@ const LevelService = Knit.CreateService({
 			print(`Gave ${player.Name} 50 exp`);
 		});
 		*/
-
+		print("Level Service Initialized");
 		Players.PlayerAdded.Connect((player) => {
-			print("Added Experience");
+			print(`${player.Name} has entered the server!`);
 			this.AddExp(player, 50);
 		});
 
 		Players.PlayerRemoving.Connect((player) => this.PlayerStats.delete(player));
+	},
+
+	KnitStart() {
+		print("Level Service Started");
 	},
 });
 
