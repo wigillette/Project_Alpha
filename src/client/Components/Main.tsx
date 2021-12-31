@@ -6,7 +6,7 @@ const Main = () => {
 	return (
 		<screengui ResetOnSpawn={false}>
 			<Button />
-			<ProfileBar Experience={50} ExperienceCap={150} Level={5} />
+			<ProfileBar />
 		</screengui>
 	);
 };

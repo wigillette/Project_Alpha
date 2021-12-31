@@ -8,7 +8,7 @@ interface UIProps {
 	ExperienceCap: number;
 }
 
-const ProfileBar = (props: UIProps) => {
+let ProfileBar = (props: UIProps) => {
 	return (
 		<frame
 			Size={new UDim2(1, 0, 0.1, 0)}
@@ -58,4 +58,13 @@ const ProfileBar = (props: UIProps) => {
 	);
 };
 
-export default ProfileBar;
+interface NewStatsState {
+	updateProfile: { Level: number; Experience: number; ExperienceCap: number };
+}
+export default ProfileBar = RoactRodux.connect(function (state: NewStatsState, props) {
+	return {
+		Level: state.updateProfile.Level,
+		Experience: state.updateProfile.Experience,
+		ExperienceCap: state.updateProfile.ExperienceCap,
+	};
+})(ProfileBar);
