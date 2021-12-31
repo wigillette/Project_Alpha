@@ -7,7 +7,7 @@ interface UIProps {
 	Level: number;
 	ExperienceCap: number;
 }
-
+const expBarRef = Roact.createRef<Frame>();
 let ProfileBar = (props: UIProps) => {
 	return (
 		<frame
@@ -47,6 +47,7 @@ let ProfileBar = (props: UIProps) => {
 				></textlabel>
 			</imagelabel>
 			<frame
+				Ref={expBarRef}
 				ZIndex={2}
 				AnchorPoint={new Vector2(0, 1)}
 				Position={new UDim2(0, 0, 1, 0)}
@@ -62,6 +63,17 @@ interface NewStatsState {
 	updateProfile: { Level: number; Experience: number; ExperienceCap: number };
 }
 export default ProfileBar = RoactRodux.connect(function (state: NewStatsState, props) {
+	const expBar = expBarRef.getValue() as Frame;
+	if (expBar) {
+		expBar.TweenSize(
+			new UDim2(state.updateProfile.Experience / state.updateProfile.ExperienceCap, 0, 0.1, 0),
+			"Out",
+			"Quad",
+			0.2,
+			true,
+			undefined,
+		);
+	}
 	return {
 		Level: state.updateProfile.Level,
 		Experience: state.updateProfile.Experience,

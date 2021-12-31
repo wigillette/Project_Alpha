@@ -1,5 +1,6 @@
 import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
+import LevelSettings from "../../shared/LevelSettings";
 
 declare global {
 	interface KnitServices {
@@ -24,7 +25,7 @@ const LevelService = Knit.CreateService({
 
 	AddExp(Player: Player, Amount: number) {
 		if (Amount !== 0) {
-			print(`Adding ${Amount} experience to ${Player.Name}`);
+			print(`Adding ${Amount} experience to ${Player.Name} | Server`);
 			const stats = this.GetStats(Player);
 			let exp = stats.Experience;
 			let level = stats.Level;
@@ -33,19 +34,21 @@ const LevelService = Knit.CreateService({
 			exp += Amount;
 			if (exp >= expCap) {
 				level += 1;
-				expCap = math.ceil(math.pow(level, 1.5) * 50);
-				print(`${Player.Name} has leveled up!`);
+				exp -= expCap;
+				expCap = LevelSettings.CalculateCap(level);
+				print(`${Player.Name} has leveled up! | Server`);
 			}
 
 			const newStats = { Experience: exp, Level: level, ExperienceCap: expCap };
 			this.PlayerStats.set(Player, newStats);
 			this.StatsChanged.Fire(Player, newStats.Level, newStats.ExperienceCap, newStats.Experience);
+			this.Client.StatsChanged.Fire(Player, newStats.Level, newStats.ExperienceCap, newStats.Experience);
 		}
 	},
 
 	GetStats(Player: Player) {
 		const stats = this.PlayerStats.get(Player);
-		return stats ?? { Level: 1, Experience: 0, ExperienceCap: 50 };
+		return stats ?? LevelSettings.InitialProfile;
 	},
 
 	KnitInit() {
@@ -55,17 +58,13 @@ const LevelService = Knit.CreateService({
 			print(`Gave ${player.Name} 50 exp`);
 		});
 		*/
-		print("Level Service Initialized");
+		print("Level Service Initialized | Server");
 		Players.PlayerAdded.Connect((player) => {
 			print(`${player.Name} has entered the server!`);
 			this.AddExp(player, 50);
 		});
 
 		Players.PlayerRemoving.Connect((player) => this.PlayerStats.delete(player));
-	},
-
-	KnitStart() {
-		print("Level Service Started");
 	},
 });
 

@@ -1,4 +1,5 @@
 import Rodux from "@rbxts/rodux";
+import LevelSettings from "../../../shared/LevelSettings";
 
 interface profileState {
 	Level: number;
@@ -11,23 +12,20 @@ interface Action<S = string, T = {}> {
 	payload?: { Level: number; Experience: number; ExperienceCap: number };
 }
 
-const profileReducer = Rodux.createReducer(
-	{ Level: 1, Experience: 0, ExperienceCap: 50 },
-	{
-		updateProfile: (state: profileState, action: Action<string, {}>) => {
-			let newState: profileState = { Level: 1, Experience: 0, ExperienceCap: 50 };
-			if (action.payload) {
-				newState = {
-					Level: action.payload.Level,
-					Experience: action.payload.Experience,
-					ExperienceCap: action.payload.ExperienceCap,
-				};
-			}
+const profileReducer = Rodux.createReducer(LevelSettings.InitialProfile, {
+	updateProfile: (state: profileState, action: Action<string, {}>) => {
+		let newState: profileState = LevelSettings.InitialProfile;
+		if (action.payload) {
+			newState = {
+				Level: action.payload.Level,
+				Experience: action.payload.Experience,
+				ExperienceCap: action.payload.ExperienceCap,
+			};
+		}
 
-			print(newState);
-			return newState;
-		},
+		print(newState);
+		return newState;
 	},
-);
+});
 
 export default profileReducer;
