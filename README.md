@@ -28,4 +28,4 @@ The frameworks Knit, Roact, and Rodux each control a respective part of the busi
 ## LEVEL SERVICE ##
 - On the server-side, the level service controls actions such as adding experience to a user and updating a user's level. The server communicates to the client each time one of these actions occur.
 - The client receives the updated user data from the server and dispatches the UpdateProfile action to the Rodux store. The Rodux store then calls on the ProfileReducer to update its respective data.
-- The Profile Bar is a Roact component which displays the user's level, experience, and experience cap. The component updates itself with the new user data each time the Rodux store updates.
+- The Profile Bar is a Roact component which displays the user's level, experience, and experience cap. The component updates its respective properties with the new user data each time the Rodux store updates.
