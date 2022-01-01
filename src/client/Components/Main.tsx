@@ -1,12 +1,15 @@
 import Roact from "@rbxts/roact";
-import Button from "./Button";
+import Button from "./CircularButton";
 import ProfileBar from "./ProfileBar";
+import GoldContainer from "./GoldContainer";
+import Shop from "./Shop";
 
 const Main = () => {
 	return (
 		<screengui ResetOnSpawn={false}>
-			<Button />
+			<GoldContainer />
 			<ProfileBar />
+			<Shop />
 		</screengui>
 	);
 };

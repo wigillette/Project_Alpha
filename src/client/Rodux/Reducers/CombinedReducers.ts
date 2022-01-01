@@ -1,10 +1,13 @@
 import Rodux from "@rbxts/rodux";
-import buttonReducer from "./ButtonReducer";
 import profileReducer from "./ProfileReducer";
+import goldReducer from "./GoldReducer";
+import shopReducer from "./ShopReducer";
 
 const reducer = Rodux.combineReducers({
-	newName: buttonReducer,
 	updateProfile: profileReducer,
+	updateGold: goldReducer,
+	toggleShop: shopReducer,
+	fetchItems: shopReducer,
 });
 
 export default reducer;

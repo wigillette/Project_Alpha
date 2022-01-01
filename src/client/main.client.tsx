@@ -4,6 +4,7 @@ import Main from "./Components/Main";
 import Store from "./Rodux/ConfigureStore";
 import { Players } from "@rbxts/services";
 import LevelService from "./Services/LevelService";
+import GoldService from "./Services/GoldService";
 
 const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
@@ -19,3 +20,4 @@ const app = Roact.createElement(
 
 Roact.mount(app, playerGui, "App");
 LevelService.init();
+GoldService.init();
