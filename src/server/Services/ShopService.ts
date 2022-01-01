@@ -1,6 +1,6 @@
 import GoldService from "./GoldService";
 import ShopItems from "../../shared/ShopItems";
-import { KnitServer as Knit } from "@rbxts/knit";
+import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
 
 declare global {
@@ -13,9 +13,7 @@ const ShopService = Knit.CreateService({
 	Name: "ShopService",
 
 	Client: {
-		FetchItems() {
-			return this.Server.FetchItems();
-		},
+		FetchItems: new RemoteSignal<(ShopItems: {}) => void>(),
 
 		PurchaseItem(Player: Player, ItemName: keyof typeof ShopItems) {
 			return this.Server.PurchaseItem(Player, ItemName);
@@ -36,12 +34,15 @@ const ShopService = Knit.CreateService({
 		}
 	},
 
-	FetchItems() {
-		return ShopItems;
+	FetchItems(Player: Player) {
+		this.Client.FetchItems.Fire(Player, ShopItems);
 	},
 
 	KnitInit() {
 		print("Gold Service Initialized | Server");
+		Players.PlayerAdded.Connect((player) => {
+			this.FetchItems(player);
+		});
 	},
 });
 
