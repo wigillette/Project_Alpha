@@ -7,7 +7,7 @@ interface shopState {
 
 interface Action<S = string, T = {}> {
 	type: string;
-	payload?: { ShopItems: {} };
+	payload?: { ShopItems: Map<string, { Price: number }> };
 }
 
 const shopReducer = Rodux.createReducer(

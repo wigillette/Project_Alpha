@@ -39,7 +39,7 @@ const ShopService = Knit.CreateService({
 	},
 
 	KnitInit() {
-		print("Gold Service Initialized | Server");
+		print("Shop Service Initialized | Server");
 		Players.PlayerAdded.Connect((player) => {
 			this.FetchItems(player);
 		});

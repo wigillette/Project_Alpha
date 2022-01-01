@@ -1,9 +1,11 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
 import ShopItem from "./ShopItem";
+import ObjectUtils from "@rbxts/object-utils";
 
 interface UIProps {
 	Opened: boolean;
+	ShopItems: Map<string, { Price: number }>;
 }
 
 const shopRef = Roact.createRef<Frame>();
@@ -54,6 +56,9 @@ class Shop extends Roact.Component<UIProps> {
 							SortOrder={"LayoutOrder"}
 							StartCorner={"TopLeft"}
 						/>
+						{ObjectUtils.entries(this.props.ShopItems).map((item) => {
+							return <ShopItem name={item[0]} price={item[1].Price} />;
+						})}
 					</scrollingframe>
 				</imagelabel>
 				<imagelabel
@@ -71,11 +76,15 @@ class Shop extends Roact.Component<UIProps> {
 		);
 	}
 
-	componentDidMount() {}
+	componentDidMount() {
+		print("HERE");
+		print(this.props.ShopItems);
+	}
 }
 
 interface ShopState {
-	toggleShop: { open: boolean };
+	toggleShop: { open: boolean; items: Map<string, { Price: number }> };
+	fetchItems: { open: boolean; items: Map<string, { Price: number }> };
 }
 export = RoactRodux.connect(function (state: ShopState, props) {
 	const shopFrame = shopRef.getValue() as Frame;
@@ -87,5 +96,6 @@ export = RoactRodux.connect(function (state: ShopState, props) {
 
 	return {
 		Opened: state.toggleShop.open,
+		ShopItems: state.fetchItems.items,
 	};
 })(Shop);
