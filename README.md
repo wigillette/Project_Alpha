@@ -28,4 +28,27 @@ The frameworks Knit, Roact, and Rodux each control a respective part of the busi
 ## LEVEL SERVICE ##
 - On the server-side, the level service controls actions such as adding experience to a user and updating a user's level. The server communicates to the client each time one of these actions occur.
 - The client receives the updated user data from the server and dispatches the UpdateProfile action to the Rodux store. The Rodux store then calls on the ProfileReducer to update its respective data.
-- The Profile Bar is a Roact component which displays the user's level, experience, and experience cap. The component updates its respective properties with the new user data each time the Rodux store updates.
+- The Profile Bar is a Roact component that displays the user's level, experience, and experience cap. The component updates its respective properties with the new user data each time the Rodux store updates.
+## GOLD SERVICE ##
+- On the server-side, the gold service controls actions such as adding/deducting gold to/from a user. The server communicates to the client each time one of these actions occur.
+- The client receives the updated gold amount from the server and dispatches the UpdateGold action to the Rodux store. The Rodux store then calls on the GoldReducer to update the gold amount in the store.
+- The Gold Container is a Roact component that displays the user's gold. The component updates its textlabel that displays the user's gold each time the Rodux store updates.
+- Additionally, the gold container has a toggle button that handles displays the Shop component.
+## SHOP SERVICE ##
+- On the server-side, the shop service controls actions such as fetching and purchasing shop items. The server communicates to the client each time one of these actions occur.
+- When the FetchedItem function runs, the client receives the fetched items. When the PurchaseItem function runs, the client receives a response from the server displaying the status of the purchase.
+- The Shop container is a Roact Component that displays a ShopItem component per every item in its ShopItems property. 
+- The ShopItem component allows users to purchase items. After the user presses the purchase button, the component dispatches the onPurchase action, which uses Rodux thunk to call another function that calls the Shop Service's Purchase Item function.
+- The Purchase Item function in the Shop Service requests the purchase from the ShopService on the server. 
+- On the server-side, the purchase item function in the Shop Service decides if the user can purchase the item by using the Gold and Inventory services. If the purchase is valid, the function calls on the Inventory service to add the item to the user's inventory and returns a successful response to the client.
+- If the purchase is rejected by the server, the client receives a failed response from the server, and this is displayed on the respective ShopItem component.
+- The list of shop items is found in the shop folder, and its data can be modified to implement new items and new categories of items.
+## INVENTORY SERVICE ##
+- On the server-side, the inventory service controls actions such as fetching or adding an item to a user's inventory and equipping an item. The server communicates to the client each time one of these actions occur.
+- When the FetchInventory function runs, the client receives the user's inventory from the server and dispatches the updateInventory action, calling on the InventoryReducer to update the user's inventory in the Rodux store.
+- When the EquipItem function runs, the client receives the user's new equipped items from the server and dispatches the equipItem function, calling on the InventoryReducer to update the user's equipped items in the Rodux store.
+- When the AddToInventory function runs, the server adds the new item to the user's inventory. Following that, the client updates the Rodux store by dispatching the updateInventory action.
+- The Inventory container is a Roact component that displays an InventoryItem component per every item in its Inventory property. Furthermore, the Inventory container contains InventoryTab components that allow the user to switch between different categories of items in their inventory.
+- The InventoryItem component enables the user to equip an item per each category. After the user presses the qeuip button, the component dispatches the onEquip action, which uses Rodux thunk to call another function that calls the Inventory Service's Equip Item function.
+- The Equip Item function in the Inventory Service requests the server-sided Inventory Service to update the user's equipped items and receives the user's newly updated items. Then, this function dispatches the equipItem action, which calls on the InventoryReducer to update the user's equipped items in the Rodux store.
+- The InventoryItem component then re-renders to display that the user has successfully equipped the respective item.
