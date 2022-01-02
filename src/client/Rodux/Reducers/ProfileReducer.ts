@@ -22,7 +22,7 @@ const profileReducer = Rodux.createReducer(LevelSettings.InitialProfile, {
 				ExperienceCap: action.payload.ExperienceCap,
 			};
 		}
-
+		print("Fetched Profile Stats Store Update Successful | Client");
 		print(newState);
 		return newState;
 	},

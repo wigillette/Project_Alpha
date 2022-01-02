@@ -12,7 +12,6 @@ const GoldService = Knit.CreateService({
 
 	// Server-exposed Signals/Fields
 	PlayerGold: new Map<Player, number>(),
-	GoldChanged: new Signal<(Player: Player, Gold: number) => void>(),
 
 	Client: {
 		GoldChanged: new RemoteSignal<(Gold: number) => void>(),
@@ -29,7 +28,6 @@ const GoldService = Knit.CreateService({
 			const newGold = gold + Amount;
 
 			this.PlayerGold.set(Player, newGold);
-			this.GoldChanged.Fire(Player, newGold);
 			this.Client.GoldChanged.Fire(Player, newGold);
 		}
 	},

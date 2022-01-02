@@ -8,8 +8,9 @@ import ShopService from "../Services/ShopService";
 
 interface UIProps {
 	name: string;
+	category: string;
 	price: number;
-	onPurchase: (itemName: string) => void;
+	onPurchase: (itemName: string, category: string) => void;
 }
 
 class ShopItem extends Roact.Component<UIProps> {
@@ -17,7 +18,8 @@ class ShopItem extends Roact.Component<UIProps> {
 
 	purchaseItem() {
 		const itemName = this.props.name;
-		this.props.onPurchase(itemName);
+		const category = this.props.category;
+		this.props.onPurchase(itemName, category);
 	}
 
 	render() {
@@ -129,9 +131,9 @@ class ShopItem extends Roact.Component<UIProps> {
 
 export = RoactRodux.connect(undefined, (dispatch: DispatchParam<typeof Store>) => {
 	return {
-		onPurchase: (itemName: string) => {
+		onPurchase: (itemName: string, category: string) => {
 			dispatch(() => {
-				ShopService.PurchaseItem(itemName);
+				ShopService.PurchaseItem(itemName, category);
 			});
 		},
 	};

@@ -4,8 +4,7 @@ const GoldService = Knit.GetService("GoldService");
 
 const GoldClient = {
 	GoldChanged: (Gold: number) => {
-		// TO-DO: Dispatch fetched Gold to Rodux store
-		print(`Updating to Gold = ${Gold}`);
+		print("Dispatching updated gold to Store.. | Client");
 		Store.dispatch({
 			type: "updateGold",
 			payload: { Gold: Gold },

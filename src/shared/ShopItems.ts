@@ -1,10 +1,10 @@
 interface ItemsFormat {
-	[Name: string]: { Price: number };
+	[Name: string]: { Price: number; Category: string };
 }
 
-const ShopItems = {
-	Pistol: { Price: 50 },
-	RedBlock: { Price: 100 },
+const ShopItems: ItemsFormat = {
+	Pistol: { Price: 50, Category: "Weapons" },
+	RedBlock: { Price: 100, Category: "Assets" },
 };
 
 export default ShopItems;

@@ -22,6 +22,7 @@ const shopReducer = Rodux.createReducer(
 			if (action.payload) {
 				newState = { open: state.open, items: action.payload.ShopItems };
 			}
+			print("Fetched Items Store Update Successful | Client");
 			return newState;
 		},
 	},

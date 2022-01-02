@@ -4,26 +4,26 @@ interface goldState {
 	Gold: number;
 }
 
-interface Action<S = string, T = {}> {
+interface Action {
 	type: string;
 	payload?: { Gold: number };
 }
 
-const profileReducer = Rodux.createReducer(
+const goldReducer = Rodux.createReducer(
 	{ Gold: 0 },
 	{
-		updateGold: (state: goldState, action: Action<string, {}>) => {
+		updateGold: (state: goldState, action: Action) => {
 			let newState: goldState = { Gold: 0 };
 			if (action.payload) {
 				newState = {
 					Gold: action.payload.Gold,
 				};
 			}
-
+			print("Fetched Gold Store Update Successful | Client");
 			print(newState);
 			return newState;
 		},
 	},
 );
 
-export default profileReducer;
+export default goldReducer;

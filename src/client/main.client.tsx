@@ -6,6 +6,7 @@ import { Players } from "@rbxts/services";
 import LevelService from "./Services/LevelService";
 import GoldService from "./Services/GoldService";
 import ShopService from "./Services/ShopService";
+import InventoryService from "./Services/InventoryService";
 
 const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
@@ -22,4 +23,5 @@ const app = Roact.createElement(
 Roact.mount(app, playerGui, "App");
 LevelService.init();
 GoldService.init();
+InventoryService.init();
 ShopService.init();

@@ -5,17 +5,16 @@ import ShopItems from "../../shared/ShopItems";
 
 const ShopClient = {
 	FetchItems: (Items: {}) => {
-		// TO-DO: Dispatch fetched items to Rodux store
-		print(`Fetching items on client`);
+		print("Dispatching shop items to Store.. | Client");
 		print(Items);
 		Store.dispatch({
 			type: "fetchItems",
 			payload: { ShopItems: Items },
 		});
 	},
-	PurchaseItem: (name: string) => {
+	PurchaseItem: (name: string, category: string) => {
 		print(`Attempting to purchase ${name}!`);
-		ShopService.PurchaseItem(name);
+		ShopService.PurchaseItem(name, category);
 	},
 	init: () => {
 		ShopService.FetchItems.Connect(ShopClient.FetchItems);

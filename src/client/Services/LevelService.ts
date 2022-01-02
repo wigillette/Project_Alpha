@@ -4,8 +4,7 @@ const LevelService = Knit.GetService("LevelService");
 
 const LevelClient = {
 	StatsChanged: (Level: number, ExperienceCap: number, Experience: number) => {
-		// TO-DO: Dispatch fetched stats to Rodux store
-		print(`Updating to Level = ${Level}, Experience = ${Experience}, Experience Cap = ${ExperienceCap} | Client`);
+		print("Dispatching updated profile stats to Store.. | Client");
 		Store.dispatch({
 			type: "updateProfile",
 			payload: { Level: Level, Experience: Experience, ExperienceCap: ExperienceCap },
