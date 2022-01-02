@@ -90,33 +90,30 @@ const DatabaseService = Knit.CreateService({
 			});
 	},
 
-	UpdateAllData(Player: Player) {
-		print(`Updating ${Player.Name}'s data`);
-		const Gold = GoldService.GetGold(Player);
-		const GoldStore = Database("Gold", Player);
-		GoldStore.Set(Gold);
-
-		const Inventory = InventoryService.FetchInventory(Player);
+	UpdateInventory(Player: Player, newInventory: InventoryFormat) {
 		const InventoryStore = Database("Inventory", Player);
-		InventoryStore.Set(Inventory);
+		InventoryStore.Set(newInventory);
+	},
 
-		const EquippedItems = InventoryService.FetchEquipped(Player);
+	UpdateEquipped(Player: Player, newEquippedItems: EquippedFormat) {
 		const EquippedItemsStore = Database("EquippedItems", Player);
-		EquippedItemsStore.Set(EquippedItems);
+		EquippedItemsStore.Set(newEquippedItems);
+	},
 
-		const Profile = LevelService.GetStats(Player);
+	UpdateProfile(Player: Player, newProfile: ProfileFormat) {
 		const ProfileStore = Database("Profile", Player);
-		ProfileStore.Set(Profile);
+		ProfileStore.Set(newProfile);
+	},
+
+	UpdateGold(Player: Player, newGold: number) {
+		const GoldStore = Database("Gold", Player);
+		GoldStore.Set(newGold);
 	},
 
 	KnitInit() {
 		Database.Combine("UserData", "Gold", "Inventory", "Profile", "EquippedItems");
 		Players.PlayerAdded.Connect((player) => {
 			this.LoadData(player);
-		});
-
-		Players.PlayerRemoving.Connect((player) => {
-			this.UpdateAllData(player);
 		});
 		print("Database Service Initialized | Server");
 	},

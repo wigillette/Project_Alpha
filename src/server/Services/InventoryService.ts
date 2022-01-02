@@ -1,5 +1,6 @@
 import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
+import Database from "@rbxts/datastore2";
 
 declare global {
 	interface KnitServices {
@@ -37,6 +38,7 @@ const InventoryService = Knit.CreateService({
 		const playerInventory = this.FetchInventory(Player);
 		playerInventory[Category as keyof typeof playerInventory].push(ItemName);
 		this.PlayerInventories.set(Player, playerInventory);
+		this.UpdateInventoryData(Player, playerInventory);
 		this.Client.InventoryChanged.Fire(Player, playerInventory);
 	},
 
@@ -65,7 +67,18 @@ const InventoryService = Knit.CreateService({
 
 		equippedItems[Category as keyof typeof equippedItems] = ItemName;
 		this.PlayerEquipped.set(Player, equippedItems);
+		this.UpdateEquippedData(Player, equippedItems);
 		return equippedItems;
+	},
+
+	UpdateInventoryData(Player: Player, newInventory: InventoryFormat) {
+		const InventoryStore = Database("Inventory", Player);
+		InventoryStore.Set(newInventory);
+	},
+
+	UpdateEquippedData(Player: Player, newEquippedItems: EquippedFormat) {
+		const EquippedItemsStore = Database("EquippedItems", Player);
+		EquippedItemsStore.Set(newEquippedItems);
 	},
 
 	InitData(Player: Player, Inventory: InventoryFormat, Equipped: EquippedFormat) {
@@ -77,7 +90,6 @@ const InventoryService = Knit.CreateService({
 
 	KnitInit() {
 		print("Inventory Service Initialized | Server");
-
 		Players.PlayerRemoving.Connect((player) => {
 			this.PlayerInventories.delete(player);
 			this.PlayerEquipped.delete(player);

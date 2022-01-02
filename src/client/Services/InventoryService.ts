@@ -13,6 +13,9 @@ const InventoryClient = {
 	EquipItem: (itemName: string, category: string) => {
 		print(`Attempting to equip ${itemName}!`);
 		const equippedItems = InventoryService.EquipItem(itemName, category);
+		InventoryClient.UpdateEquippedStore(equippedItems);
+	},
+	UpdateEquippedStore: (equippedItems: { Assets: string; Weapons: string }) => {
 		print("Dispatching updated equipped item to Store.. | Client");
 		Store.dispatch({
 			type: "equipItem",
@@ -23,6 +26,7 @@ const InventoryClient = {
 		const initialInventory = InventoryService.FetchInventory();
 		InventoryClient.FetchInventory(initialInventory);
 		InventoryService.InventoryChanged.Connect(InventoryClient.FetchInventory);
+		InventoryService.EquippedChanged.Connect(InventoryClient.UpdateEquippedStore);
 		print("Inventory Service Initialized | Client");
 	},
 };

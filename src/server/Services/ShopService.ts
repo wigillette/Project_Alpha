@@ -1,8 +1,7 @@
 import GoldService from "./GoldService";
 import InventoryService from "./InventoryService";
 import ShopItems from "../../shared/ShopItems";
-import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
-import { Players } from "@rbxts/services";
+import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
 
 declare global {
 	interface KnitServices {

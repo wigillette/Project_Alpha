@@ -1,6 +1,7 @@
 import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
 import LevelSettings from "../../shared/LevelSettings";
+import Database from "@rbxts/datastore2";
 
 declare global {
 	interface KnitServices {
@@ -8,11 +9,17 @@ declare global {
 	}
 }
 
+interface ProfileFormat {
+	Level: number;
+	Experience: number;
+	ExperienceCap: number;
+}
+
 const LevelService = Knit.CreateService({
 	Name: "LevelService",
 
 	// Server-exposed Signals/Fields
-	PlayerStats: new Map<Player, { Level: number; Experience: number; ExperienceCap: number }>(),
+	PlayerStats: new Map<Player, ProfileFormat>(),
 
 	Client: {
 		StatsChanged: new RemoteSignal<(Level: number, ExperienceCap: number, Experience: number) => void>(),
@@ -40,6 +47,7 @@ const LevelService = Knit.CreateService({
 
 			const newStats = { Experience: exp, Level: level, ExperienceCap: expCap };
 			this.PlayerStats.set(Player, newStats);
+			this.UpdateProfileData(Player, newStats);
 			this.Client.StatsChanged.Fire(Player, newStats.Level, newStats.ExperienceCap, newStats.Experience);
 		}
 	},
@@ -47,6 +55,11 @@ const LevelService = Knit.CreateService({
 	GetStats(Player: Player) {
 		const stats = this.PlayerStats.get(Player);
 		return stats ?? LevelSettings.InitialProfile;
+	},
+
+	UpdateProfileData(Player: Player, newProfile: ProfileFormat) {
+		const ProfileStore = Database("Profile", Player);
+		ProfileStore.Set(newProfile);
 	},
 
 	InitData(Player: Player, UserStats: { Level: number; Experience: number; ExperienceCap: number }) {

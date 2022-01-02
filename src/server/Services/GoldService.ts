@@ -1,5 +1,6 @@
 import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
+import Database from "@rbxts/datastore2";
 
 declare global {
 	interface KnitServices {
@@ -29,12 +30,18 @@ const GoldService = Knit.CreateService({
 
 			this.PlayerGold.set(Player, newGold);
 			this.Client.GoldChanged.Fire(Player, newGold);
+			this.UpdateGoldData(Player, newGold);
 		}
 	},
 
 	GetGold(Player: Player) {
 		const gold = this.PlayerGold.get(Player);
 		return gold ?? 0;
+	},
+
+	UpdateGoldData(Player: Player, newGold: number) {
+		const GoldStore = Database("Gold", Player);
+		GoldStore.Set(newGold);
 	},
 
 	InitData(Player: Player, Gold: number) {
