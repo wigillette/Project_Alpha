@@ -7,13 +7,13 @@ interface profileState {
 	Experience: number;
 }
 
-interface Action<S = string, T = {}> {
+interface Action {
 	type: string;
 	payload?: { Level: number; Experience: number; ExperienceCap: number };
 }
 
 const profileReducer = Rodux.createReducer(LevelSettings.InitialProfile, {
-	updateProfile: (state: profileState, action: Action<string, {}>) => {
+	updateProfile: (state: profileState, action: Action) => {
 		let newState: profileState = LevelSettings.InitialProfile;
 		if (action.payload) {
 			newState = {

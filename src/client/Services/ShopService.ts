@@ -1,6 +1,7 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 import Store from "../Rodux/ConfigureStore";
 const ShopService = Knit.GetService("ShopService");
+import ShopItems from "../../shared/ShopItems";
 
 const ShopClient = {
 	FetchItems: (Items: {}) => {
@@ -11,6 +12,10 @@ const ShopClient = {
 			type: "fetchItems",
 			payload: { ShopItems: Items },
 		});
+	},
+	PurchaseItem: (name: string) => {
+		print(`Attempting to purchase ${name}!`);
+		ShopService.PurchaseItem(name);
 	},
 	init: () => {
 		ShopService.FetchItems.Connect(ShopClient.FetchItems);

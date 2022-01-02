@@ -75,11 +75,6 @@ class Shop extends Roact.Component<UIProps> {
 			</frame>
 		);
 	}
-
-	componentDidMount() {
-		print("HERE");
-		print(this.props.ShopItems);
-	}
 }
 
 interface ShopState {

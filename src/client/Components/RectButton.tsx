@@ -43,16 +43,16 @@ const Button = (props: UIProps) => {
 				Size={new UDim2(1, 0, 1, 0)}
 				ImageColor3={props.color}
 				BackgroundTransparency={1}
-				ZIndex={2}
+				ZIndex={4}
 				Ref={buttonRef}
 				ScaleType={Enum.ScaleType.Slice}
-				SliceCenter={new Rect(350, 350, 350, 350)}
+				SliceCenter={new Rect(10, 10, 10, 10)}
 				Event={{
 					MouseButton1Click: onClick,
 				}}
 			>
 				<textlabel
-					ZIndex={2}
+					ZIndex={5}
 					Text={text}
 					TextScaled={true}
 					Font={"TitilliumWeb"}
@@ -65,13 +65,13 @@ const Button = (props: UIProps) => {
 			<imagelabel
 				Image="http://www.roblox.com/asset/?id=5295627555"
 				AnchorPoint={new Vector2(0.5, 0.5)}
-				ZIndex={1}
+				ZIndex={3}
 				Position={new UDim2(0.5, 0, 0.5, 3)}
 				Size={new UDim2(1, 0, 1, 0)}
 				ImageColor3={props.shadowColor}
 				BackgroundTransparency={1}
 				ScaleType={Enum.ScaleType.Slice}
-				SliceCenter={new Rect(350, 350, 350, 350)}
+				SliceCenter={new Rect(10, 10, 10, 10)}
 			></imagelabel>
 		</frame>
 	);
