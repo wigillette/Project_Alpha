@@ -42,11 +42,12 @@ const ShopService = Knit.CreateService({
 		this.Client.FetchItems.Fire(Player, ShopItems);
 	},
 
+	InitData(Player: Player) {
+		this.Client.FetchItems.Fire(Player, ShopItems);
+	},
+
 	KnitInit() {
 		print("Shop Service Initialized | Server");
-		Players.PlayerAdded.Connect((player) => {
-			this.FetchItems(player);
-		});
 	},
 });
 

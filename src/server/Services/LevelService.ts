@@ -13,7 +13,6 @@ const LevelService = Knit.CreateService({
 
 	// Server-exposed Signals/Fields
 	PlayerStats: new Map<Player, { Level: number; Experience: number; ExperienceCap: number }>(),
-	StatsChanged: new Signal<(Player: Player, Level: number, ExperienceCap: number, Experience: number) => void>(),
 
 	Client: {
 		StatsChanged: new RemoteSignal<(Level: number, ExperienceCap: number, Experience: number) => void>(),
@@ -41,7 +40,6 @@ const LevelService = Knit.CreateService({
 
 			const newStats = { Experience: exp, Level: level, ExperienceCap: expCap };
 			this.PlayerStats.set(Player, newStats);
-			this.StatsChanged.Fire(Player, newStats.Level, newStats.ExperienceCap, newStats.Experience);
 			this.Client.StatsChanged.Fire(Player, newStats.Level, newStats.ExperienceCap, newStats.Experience);
 		}
 	},
@@ -51,13 +49,13 @@ const LevelService = Knit.CreateService({
 		return stats ?? LevelSettings.InitialProfile;
 	},
 
+	InitData(Player: Player, UserStats: { Level: number; Experience: number; ExperienceCap: number }) {
+		this.PlayerStats.set(Player, UserStats);
+		this.Client.StatsChanged.Fire(Player, UserStats.Level, UserStats.ExperienceCap, UserStats.Experience);
+	},
+
 	KnitInit() {
 		print("Level Service Initialized | Server");
-		Players.PlayerAdded.Connect((player) => {
-			print(`${player.Name} has entered the server!`);
-			this.AddExp(player, 5000);
-		});
-
 		Players.PlayerRemoving.Connect((player) => this.PlayerStats.delete(player));
 	},
 });

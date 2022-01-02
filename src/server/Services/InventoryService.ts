@@ -24,6 +24,7 @@ const InventoryService = Knit.CreateService({
 
 	Client: {
 		InventoryChanged: new RemoteSignal<(Inventory: InventoryFormat) => void>(),
+		EquippedChanged: new RemoteSignal<(Equipped: EquippedFormat) => void>(),
 		FetchInventory(Player: Player) {
 			return this.Server.FetchInventory(Player);
 		},
@@ -67,11 +68,15 @@ const InventoryService = Knit.CreateService({
 		return equippedItems;
 	},
 
+	InitData(Player: Player, Inventory: InventoryFormat, Equipped: EquippedFormat) {
+		this.PlayerInventories.set(Player, Inventory);
+		this.PlayerEquipped.set(Player, Equipped);
+		this.Client.InventoryChanged.Fire(Player, Inventory);
+		this.Client.EquippedChanged.Fire(Player, Equipped);
+	},
+
 	KnitInit() {
 		print("Inventory Service Initialized | Server");
-		Players.PlayerAdded.Connect((player) => {
-			//this.FetchInventory(player);
-		});
 
 		Players.PlayerRemoving.Connect((player) => {
 			this.PlayerInventories.delete(player);

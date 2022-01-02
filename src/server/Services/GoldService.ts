@@ -37,13 +37,13 @@ const GoldService = Knit.CreateService({
 		return gold ?? 0;
 	},
 
+	InitData(Player: Player, Gold: number) {
+		this.PlayerGold.set(Player, Gold);
+		this.Client.GoldChanged.Fire(Player, Gold);
+	},
+
 	KnitInit() {
 		print("Gold Service Initialized | Server");
-		Players.PlayerAdded.Connect((player) => {
-			print(`${player.Name} has entered the server!`);
-			this.AddGold(player, 5000);
-		});
-
 		Players.PlayerRemoving.Connect((player) => this.PlayerGold.delete(player));
 	},
 });
