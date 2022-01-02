@@ -25,8 +25,7 @@ const InventoryService = Knit.CreateService({
 
 	AddToInventory(Player: Player, ItemName: string, Category: string) {
 		const playerInventory = this.FetchInventory(Player);
-		const itemList = playerInventory[Category as keyof typeof playerInventory];
-		itemList.push(ItemName);
+		playerInventory[Category as keyof typeof playerInventory].push(ItemName);
 		this.Client.InventoryChanged.Fire(Player, playerInventory);
 	},
 
