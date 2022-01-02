@@ -9,7 +9,10 @@ const reducer = Rodux.combineReducers({
 	updateGold: goldReducer,
 	toggleShop: shopReducer,
 	fetchItems: shopReducer,
-	fetchInventory: inventoryReducer,
+	updateInventory: inventoryReducer,
+	toggleInventory: inventoryReducer,
+	changeTab: inventoryReducer,
+	equipItem: inventoryReducer,
 });
 
 export default reducer;

@@ -12,14 +12,23 @@ interface InventoryFormat {
 	Assets: string[];
 }
 
+interface EquippedFormat {
+	Weapons: string;
+	Assets: string;
+}
+
 const InventoryService = Knit.CreateService({
 	Name: "InventoryService",
 	PlayerInventories: new Map<Player, InventoryFormat>(),
+	PlayerEquipped: new Map<Player, EquippedFormat>(),
 
 	Client: {
 		InventoryChanged: new RemoteSignal<(Inventory: InventoryFormat) => void>(),
 		FetchInventory(Player: Player) {
 			return this.Server.FetchInventory(Player);
+		},
+		EquipItem(Player: Player, ItemName: string, Category: string) {
+			return this.Server.EquipItem(Player, ItemName, Category);
 		},
 	},
 
@@ -44,10 +53,29 @@ const InventoryService = Knit.CreateService({
 		return playerInventory;
 	},
 
+	FetchEquipped(Player: Player) {
+		const equippedItems = this.PlayerEquipped.get(Player) || { Weapons: "", Assets: "" };
+		return equippedItems;
+	},
+
+	EquipItem(Player: Player, ItemName: string, Category: string) {
+		const equippedItems = this.FetchEquipped(Player);
+		print(equippedItems);
+
+		equippedItems[Category as keyof typeof equippedItems] = ItemName;
+		this.PlayerEquipped.set(Player, equippedItems);
+		return equippedItems;
+	},
+
 	KnitInit() {
 		print("Inventory Service Initialized | Server");
 		Players.PlayerAdded.Connect((player) => {
-			this.FetchInventory(player);
+			//this.FetchInventory(player);
+		});
+
+		Players.PlayerRemoving.Connect((player) => {
+			this.PlayerInventories.delete(player);
+			this.PlayerEquipped.delete(player);
 		});
 	},
 });

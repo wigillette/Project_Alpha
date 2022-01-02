@@ -6,7 +6,6 @@ import ShopItems from "../../shared/ShopItems";
 const ShopClient = {
 	FetchItems: (Items: {}) => {
 		print("Dispatching shop items to Store.. | Client");
-		print(Items);
 		Store.dispatch({
 			type: "fetchItems",
 			payload: { ShopItems: Items },

@@ -9,7 +9,6 @@ interface UIProps {
 }
 
 const shopRef = Roact.createRef<Frame>();
-const gridRef = Roact.createRef<ScrollingFrame>();
 class Shop extends Roact.Component<UIProps> {
 	render() {
 		return (
@@ -21,6 +20,28 @@ class Shop extends Roact.Component<UIProps> {
 				BackgroundTransparency={1}
 			>
 				<imagelabel
+					ZIndex={3}
+					Size={new UDim2(1, 0, 0.12, 0)}
+					AnchorPoint={new Vector2(0.5, 0)}
+					Position={new UDim2(0.5, 0, 0, 0)}
+					Image="http://www.roblox.com/asset/?id=5295627555"
+					ImageColor3={Color3.fromRGB(230, 230, 230)}
+					ScaleType={Enum.ScaleType.Slice}
+					BackgroundTransparency={1}
+					SliceCenter={new Rect(10, 10, 10, 10)}
+				>
+					<textlabel
+						ZIndex={4}
+						Position={new UDim2(0.5, 0, 0.5, 0)}
+						Size={new UDim2(1, 0, 1, 0)}
+						AnchorPoint={new Vector2(0.5, 0.5)}
+						Font={"TitilliumWeb"}
+						BackgroundTransparency={1}
+						TextScaled={true}
+						Text={"Shop"}
+					/>
+				</imagelabel>
+				<imagelabel
 					ZIndex={1}
 					Size={new UDim2(1, 0, 1, 0)}
 					AnchorPoint={new Vector2(0.5, 0.5)}
@@ -31,21 +52,10 @@ class Shop extends Roact.Component<UIProps> {
 					BackgroundTransparency={1}
 					SliceCenter={new Rect(10, 10, 10, 10)}
 				>
-					<textlabel
-						ZIndex={2}
-						Position={new UDim2(0.5, 0, 0.01, 0)}
-						Size={new UDim2(1, 0, 0.1, 0)}
-						AnchorPoint={new Vector2(0.5, 0.025)}
-						Font={"TitilliumWeb"}
-						BackgroundTransparency={1}
-						TextScaled={true}
-						Text={"Shop"}
-					/>
 					<scrollingframe
 						Position={new UDim2(0.5, 0, 0.6, 0)}
 						AnchorPoint={new Vector2(0.5, 0.6)}
 						BackgroundTransparency={1}
-						Ref={gridRef}
 						BorderSizePixel={0}
 						Size={new UDim2(0.9, 0, 0.75, 0)}
 					>

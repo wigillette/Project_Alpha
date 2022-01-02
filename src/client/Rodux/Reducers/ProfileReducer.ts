@@ -23,7 +23,6 @@ const profileReducer = Rodux.createReducer(LevelSettings.InitialProfile, {
 			};
 		}
 		print("Fetched Profile Stats Store Update Successful | Client");
-		print(newState);
 		return newState;
 	},
 });

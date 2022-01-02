@@ -1,30 +1,28 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
 import EffectsHandler from "../../shared/EffectsHandler";
-import RectButton from "./RectButton";
 import Store from "../Rodux/ConfigureStore";
 import { DispatchParam } from "@rbxts/rodux";
-import ShopService from "../Services/ShopService";
+import InventoryService from "../Services/InventoryService";
 
 interface UIProps {
 	name: string;
 	category: string;
-	price: number;
-	onPurchase: (itemName: string, category: string) => void;
+	onEquip: (itemName: string, category: string) => void;
+	equippedItems: { Weapons: string; Assets: string };
 }
 
-class ShopItem extends Roact.Component<UIProps> {
-	buttonRef;
+class InventoryItem extends Roact.Component<UIProps> {
+	buttonRef = Roact.createRef<ImageButton>();
 
-	purchaseItem() {
-		const itemName = this.props.name;
-		const category = this.props.category;
-		this.props.onPurchase(itemName, category);
-	}
-
-	constructor(props: UIProps) {
-		super(props);
-		this.buttonRef = Roact.createRef<ImageButton>();
+	equipItem() {
+		if (
+			this.props.name !== this.props.equippedItems[this.props.category as keyof typeof this.props.equippedItems]
+		) {
+			const itemName = this.props.name;
+			const category = this.props.category;
+			this.props.onEquip(itemName, category);
+		}
 	}
 
 	render() {
@@ -34,6 +32,7 @@ class ShopItem extends Roact.Component<UIProps> {
 				AnchorPoint={new Vector2(0.5, 0.5)}
 				Position={new UDim2(0.5, 0, 0.5, 0)}
 				BackgroundTransparency={1}
+				ZIndex={5}
 			>
 				<imagelabel
 					ZIndex={2}
@@ -64,12 +63,24 @@ class ShopItem extends Roact.Component<UIProps> {
 						AnchorPoint={new Vector2(0.5, 0.8)}
 						Event={{
 							MouseEnter: () => {
-								const button = this.buttonRef.getValue() as ImageButton;
-								EffectsHandler.tweenImageColor(button, Color3.fromRGB(115, 191, 212));
+								if (
+									this.props.equippedItems[
+										this.props.category as keyof typeof this.props.equippedItems
+									] !== this.props.name
+								) {
+									const button = this.buttonRef.getValue() as ImageButton;
+									EffectsHandler.tweenImageColor(button, Color3.fromRGB(115, 191, 212));
+								}
 							},
 							MouseLeave: () => {
-								const button = this.buttonRef.getValue() as ImageButton;
-								EffectsHandler.tweenImageColor(button, Color3.fromRGB(84, 130, 143));
+								if (
+									this.props.equippedItems[
+										this.props.category as keyof typeof this.props.equippedItems
+									] !== this.props.name
+								) {
+									const button = this.buttonRef.getValue() as ImageButton;
+									EffectsHandler.tweenImageColor(button, Color3.fromRGB(84, 130, 143));
+								}
 							},
 						}}
 					>
@@ -83,19 +94,33 @@ class ShopItem extends Roact.Component<UIProps> {
 							AnchorPoint={new Vector2(0.5, 0.5)}
 							Position={new UDim2(0.5, 0, 0.5, 0)}
 							Size={new UDim2(1, 0, 1, 0)}
-							ImageColor3={Color3.fromRGB(84, 130, 143)}
+							ImageColor3={
+								this.props.equippedItems[
+									this.props.category as keyof typeof this.props.equippedItems
+								] === this.props.name
+									? Color3.fromRGB(51, 87, 97)
+									: Color3.fromRGB(84, 130, 143)
+							}
 							BackgroundTransparency={1}
 							ZIndex={4}
 							Ref={this.buttonRef}
 							ScaleType={Enum.ScaleType.Slice}
 							SliceCenter={new Rect(10, 10, 10, 10)}
 							Event={{
-								MouseButton1Click: () => this.purchaseItem(),
+								MouseButton1Click: () => {
+									this.equipItem();
+								},
 							}}
 						>
 							<textlabel
 								ZIndex={5}
-								Text={tostring(this.props.price)}
+								Text={
+									this.props.equippedItems[
+										this.props.category as keyof typeof this.props.equippedItems
+									] === this.props.name
+										? "Equipped"
+										: "Equip"
+								}
 								TextScaled={true}
 								Font={"TitilliumWeb"}
 								BackgroundTransparency={1}
@@ -110,7 +135,13 @@ class ShopItem extends Roact.Component<UIProps> {
 							ZIndex={3}
 							Position={new UDim2(0.5, 0, 0.5, 3)}
 							Size={new UDim2(1, 0, 1, 0)}
-							ImageColor3={Color3.fromRGB(43, 51, 54)}
+							ImageColor3={
+								this.props.equippedItems[
+									this.props.category as keyof typeof this.props.equippedItems
+								] === this.props.name
+									? Color3.fromRGB(20, 25, 27)
+									: Color3.fromRGB(43, 51, 54)
+							}
 							BackgroundTransparency={1}
 							ScaleType={Enum.ScaleType.Slice}
 							SliceCenter={new Rect(10, 10, 10, 10)}
@@ -133,13 +164,27 @@ class ShopItem extends Roact.Component<UIProps> {
 		);
 	}
 }
-
-export = RoactRodux.connect(undefined, (dispatch: DispatchParam<typeof Store>) => {
-	return {
-		onPurchase: (itemName: string, category: string) => {
-			dispatch(() => {
-				ShopService.PurchaseItem(itemName, category);
-			});
-		},
+interface InventoryItemState {
+	equipItem: {
+		toggle: boolean;
+		currentTab: string;
+		inventory: { Assets: string[]; Weapons: string[] };
+		equippedItems: { Weapons: string; Assets: string };
 	};
-})(ShopItem);
+}
+export = RoactRodux.connect(
+	function (state: InventoryItemState, props) {
+		return {
+			equippedItems: state.equipItem.equippedItems,
+		};
+	},
+	(dispatch: DispatchParam<typeof Store>) => {
+		return {
+			onEquip: (itemName: string, category: string) => {
+				dispatch(() => {
+					InventoryService.EquipItem(itemName, category);
+				});
+			},
+		};
+	},
+)(InventoryItem);

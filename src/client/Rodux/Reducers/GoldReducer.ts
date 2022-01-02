@@ -20,7 +20,6 @@ const goldReducer = Rodux.createReducer(
 				};
 			}
 			print("Fetched Gold Store Update Successful | Client");
-			print(newState);
 			return newState;
 		},
 	},

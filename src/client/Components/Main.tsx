@@ -2,6 +2,7 @@ import Roact from "@rbxts/roact";
 import ProfileBar from "./ProfileBar";
 import GoldContainer from "./GoldContainer";
 import Shop from "./Shop";
+import Inventory from "./Inventory";
 
 const Main = () => {
 	return (
@@ -9,6 +10,7 @@ const Main = () => {
 			<GoldContainer />
 			<ProfileBar />
 			<Shop />
+			<Inventory />
 		</screengui>
 	);
 };

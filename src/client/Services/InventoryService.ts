@@ -7,7 +7,16 @@ const InventoryClient = {
 		print("Dispatching updated inventory to Store.. | Client");
 		Store.dispatch({
 			type: "updateInventory",
-			payload: { Assets: Inventory.Assets, Weapons: Inventory.Weapons },
+			inventory: { Assets: Inventory.Assets, Weapons: Inventory.Weapons },
+		});
+	},
+	EquipItem: (itemName: string, category: string) => {
+		print(`Attempting to equip ${itemName}!`);
+		const equippedItems = InventoryService.EquipItem(itemName, category);
+		print("Dispatching updated equipped item to Store.. | Client");
+		Store.dispatch({
+			type: "equipItem",
+			equippedItems: equippedItems,
 		});
 	},
 	init: () => {
