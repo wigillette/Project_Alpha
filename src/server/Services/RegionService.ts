@@ -10,7 +10,7 @@ declare global {
 }
 
 const RegionService = Knit.CreateService({
-	Name: "AssetService",
+	Name: "RegionService",
 
 	// Server-exposed Signals/Fields
 	PlayerRegions: new Map<Player, BasePart>(),
