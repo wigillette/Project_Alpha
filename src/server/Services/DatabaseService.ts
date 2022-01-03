@@ -5,6 +5,7 @@ import GoldService from "./GoldService";
 import InventoryService from "./InventoryService";
 import LevelService from "./LevelService";
 import ShopService from "./ShopService";
+import AssetService from "./AssetService";
 import LevelSettings from "../../shared/LevelSettings";
 
 declare global {
@@ -27,6 +28,11 @@ interface ProfileFormat {
 	Level: number;
 	Experience: number;
 	ExperienceCap: number;
+}
+
+interface AssetInfo {
+	Position: Vector3;
+	Name: string;
 }
 
 const DatabaseService = Knit.CreateService({
@@ -75,6 +81,17 @@ const DatabaseService = Knit.CreateService({
 				print(err);
 			});
 
+		const AssetStore = Database("AssetInfo", Player);
+		const AssetInfo = AssetStore.GetAsync([])
+			.then((userAssets) => {
+				AssetService.InitData(Player, userAssets as AssetInfo[]);
+				print(`Successfully initialized ${Player.Name}'s Asset Data`);
+			})
+			.catch((err) => {
+				print(`Failed to initialize ${Player.Name}'s Asset Data`);
+				print(err);
+			});
+
 		ShopService.InitData(Player);
 	},
 
@@ -90,28 +107,8 @@ const DatabaseService = Knit.CreateService({
 			});
 	},
 
-	UpdateInventory(Player: Player, newInventory: InventoryFormat) {
-		const InventoryStore = Database("Inventory", Player);
-		InventoryStore.Set(newInventory);
-	},
-
-	UpdateEquipped(Player: Player, newEquippedItems: EquippedFormat) {
-		const EquippedItemsStore = Database("EquippedItems", Player);
-		EquippedItemsStore.Set(newEquippedItems);
-	},
-
-	UpdateProfile(Player: Player, newProfile: ProfileFormat) {
-		const ProfileStore = Database("Profile", Player);
-		ProfileStore.Set(newProfile);
-	},
-
-	UpdateGold(Player: Player, newGold: number) {
-		const GoldStore = Database("Gold", Player);
-		GoldStore.Set(newGold);
-	},
-
 	KnitInit() {
-		Database.Combine("UserData", "Gold", "Inventory", "Profile", "EquippedItems");
+		Database.Combine("UserData", "Gold", "Inventory", "Profile", "EquippedItems", "AssetInfo");
 		Players.PlayerAdded.Connect((player) => {
 			this.LoadData(player);
 		});
