@@ -41,7 +41,7 @@ const RegionService = Knit.CreateService({
 		return response;
 	},
 
-	PlaceAsset(Player: Player, AssetName: string, Position: Vector3) {
+	PlaceAsset(Player: Player, AssetName: string, Position: CFrame) {
 		const userRegion = this.PlayerRegions.get(Player);
 		let toReturn = "You do not own a region!";
 		if (userRegion) {

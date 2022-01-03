@@ -1,6 +1,8 @@
 import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
-import { Players } from "@rbxts/services";
+import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Database from "@rbxts/datastore2";
+import InventoryService from "./InventoryService";
+import LevelService from "./LevelService";
 
 declare global {
 	interface KnitServices {
@@ -9,7 +11,7 @@ declare global {
 }
 
 interface AssetInfo {
-	Position: Vector3;
+	Position: CFrame;
 	Name: string;
 }
 
@@ -18,20 +20,50 @@ const AssetService = Knit.CreateService({
 
 	// Server-exposed Signals/Fields
 	PlayerAssets: new Map<Player, AssetInfo[]>(),
+	AssetsFolder: ReplicatedStorage.WaitForChild("Assets"),
 
-	PlaceAsset(Player: Player, AssetName: string, Position: Vector3, Region: BasePart) {
-		const response = `You do not own a ${AssetName}!`;
-		// TO-DO: Place the user's asset at the respective position
-		// 1. Check if the user owns the asset
-		//      2. Place the asset
-		//      3. Add Exp to the user using the LevelService
-		//      4. Save the asset to the user's AssetInfo in the database (using UpdateAssetData)
-		//      5. Return a response string
+	PlaceAsset(Player: Player, AssetName: string, Position: CFrame, Region: BasePart) {
+		let response = `Failed to place ${AssetName}!`;
+		const userAssetInfo = this.PlayerAssets.get(Player);
+		const ownsAsset = InventoryService.ContainsItem(Player, AssetName, "Assets");
+		const assetObject = this.AssetsFolder.FindFirstChild(AssetName);
+
+		if (ownsAsset && assetObject && userAssetInfo) {
+			// Clone the new object
+			const newObject = assetObject.Clone() as BasePart;
+			newObject.Parent = Workspace; // Change this to a folder for the user?
+			newObject.CFrame = Position.ToObjectSpace(Region.CFrame);
+			// Add experience
+			LevelService.AddExp(Player, 10);
+			// Update data
+			userAssetInfo.push({ Position: Position, Name: AssetName });
+			this.PlayerAssets.set(Player, userAssetInfo);
+			this.UpdateAssetData(Player, userAssetInfo);
+			// Update response
+			response = `${AssetName} Placement Successful`;
+		}
+
 		return response;
 	},
 
 	LoadAssets(Player: Player, Region: BasePart) {
-		// TO-DO: Load the player's assets onto their baseplate by getting their assets in PlayerAssets
+		const userAssetInfo = this.PlayerAssets.get(Player);
+		let response = "Failed to load assets";
+		if (userAssetInfo) {
+			userAssetInfo.forEach((asset) => {
+				const assetObject = this.AssetsFolder.FindFirstChild(asset.Name);
+				if (assetObject) {
+					const newObject = assetObject.Clone() as BasePart;
+					newObject.Parent = Workspace; // Change this to a folder for the user?
+					newObject.CFrame = asset.Position.ToObjectSpace(Region.CFrame);
+				} else {
+					print(`Failed to load ${asset.Name}!`);
+				}
+			});
+			response = "Successfully loaded assets";
+		}
+
+		return response;
 	},
 
 	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {

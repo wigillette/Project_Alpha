@@ -31,7 +31,7 @@ interface ProfileFormat {
 }
 
 interface AssetInfo {
-	Position: Vector3;
+	Position: CFrame;
 	Name: string;
 }
 

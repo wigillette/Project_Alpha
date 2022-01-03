@@ -6,7 +6,7 @@ const RegionClient = {
 		print(`Attempting to claim ${key.Name}!`);
 		RegionService.ClaimRegion(key);
 	},
-	PlaceAsset: (name: string, position: Vector3) => {
+	PlaceAsset: (name: string, position: CFrame) => {
 		print(`Attempting to place ${name} at ${position}!`);
 		RegionService.PlaceAsset(name, position);
 	},
