@@ -21,6 +21,7 @@ const AssetService = Knit.CreateService({
 	// Server-exposed Signals/Fields
 	PlayerAssets: new Map<Player, AssetInfo[]>(),
 	AssetsFolder: ReplicatedStorage.WaitForChild("Assets"),
+	RegionAssetsFolder: Workspace.WaitForChild("RegionAssets"),
 
 	PlaceAsset(Player: Player, AssetName: string, Position: CFrame, Region: BasePart) {
 		let response = `Failed to place ${AssetName}!`;
@@ -30,8 +31,9 @@ const AssetService = Knit.CreateService({
 
 		if (ownsAsset && assetObject && userAssetInfo) {
 			// Clone the new object
+			const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 			const newObject = assetObject.Clone() as BasePart;
-			newObject.Parent = Workspace; // Change this to a folder for the user?
+			newObject.Parent = assetFolder; // Change this to a folder for the user?
 			newObject.CFrame = Position.ToObjectSpace(Region.CFrame);
 			// Add experience
 			LevelService.AddExp(Player, 10);
@@ -46,23 +48,52 @@ const AssetService = Knit.CreateService({
 		return response;
 	},
 
+	RemoveAsset(Player: Player, Asset: BasePart, Region: BasePart) {
+		let response = `Failed to remove the asset`;
+		const userAssetInfo = this.PlayerAssets.get(Player);
+		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
+		if (userAssetInfo && assetFolder) {
+			userAssetInfo.forEach((assetInfo) => {
+				if (Asset && assetInfo.Name === Asset.Name && assetInfo.Position === Asset.CFrame) {
+					Asset.Destroy();
+					response = `${Player.Name} has successfully removed ${Asset.Name}`;
+				}
+			});
+		}
+
+		return response;
+	},
+
 	LoadAssets(Player: Player, Region: BasePart) {
 		const userAssetInfo = this.PlayerAssets.get(Player);
 		let response = "Failed to load assets";
 		if (userAssetInfo) {
-			userAssetInfo.forEach((asset) => {
-				const assetObject = this.AssetsFolder.FindFirstChild(asset.Name);
-				if (assetObject) {
-					const newObject = assetObject.Clone() as BasePart;
-					newObject.Parent = Workspace; // Change this to a folder for the user?
-					newObject.CFrame = asset.Position.ToObjectSpace(Region.CFrame);
-				} else {
-					print(`Failed to load ${asset.Name}!`);
-				}
-			});
+			const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
+			if (assetFolder) {
+				userAssetInfo.forEach((asset) => {
+					const assetObject = this.AssetsFolder.FindFirstChild(asset.Name);
+					if (assetObject) {
+						const newObject = assetObject.Clone() as BasePart;
+						newObject.Parent = assetFolder;
+						newObject.CFrame = asset.Position.ToObjectSpace(Region.CFrame);
+					} else {
+						print(`Failed to load ${asset.Name}!`);
+					}
+				});
+			}
 			response = "Successfully loaded assets";
 		}
 
+		return response;
+	},
+
+	RemoveAllAssets(Player: Player, Region: BasePart) {
+		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
+		let response = "Region Assets folder does not exist!";
+		if (assetFolder) {
+			response = `Successfully removed all assets from the Region ${Region.Name} folder`;
+			assetFolder.ClearAllChildren();
+		}
 		return response;
 	},
 

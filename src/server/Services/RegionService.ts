@@ -20,25 +20,55 @@ const RegionService = Knit.CreateService({
 			return this.Server.ClaimRegion(Player, Key);
 		},
 
-		PlaceAsset(Player: Player, AssetName: string, Position: Vector3) {
+		PlaceAsset(Player: Player, AssetName: string, Position: CFrame) {
 			return this.Server.PlaceAsset(Player, AssetName, Position);
+		},
+
+		RemoveAsset(Player: Player, Asset: BasePart) {
+			return this.Server.RemoveAsset(Player, Asset);
+		},
+
+		GetRegions(Player: Player) {
+			return this.Server.GetRegions();
+		},
+
+		ClearRegion(Player: Player) {
+			return this.Server.ClearRegion(Player);
 		},
 	},
 
 	ClaimRegion(Player: Player, Key: BasePart) {
-		let response = "";
+		let canClaim = false;
 		if (!this.PlayerRegions.has(Player)) {
 			if (!ObjectUtils.values(this.PlayerRegions).includes(Key)) {
 				this.PlayerRegions.set(Player, Key);
 				AssetService.LoadAssets(Player, Key);
-				response = "Region successfully claimed!";
+				print(`${Player.Name} has successfully claimed region ${Key.Name}!`);
+				canClaim = true;
 			} else {
-				response = "Region is already claimed by someone else!";
+				print(`${Player.Name} attempted to claim a region owned by someone else!`);
+				canClaim = false;
 			}
 		} else {
-			response = "You already have a region!";
+			print(`${Player.Name} already has a region!`);
+			canClaim = false;
 		}
+		return canClaim;
+	},
+
+	ClearRegion(Player: Player) {
+		const userRegion = this.PlayerRegions.get(Player);
+		let response = `${Player.Name} does not have a region!`;
+		if (userRegion) {
+			response = AssetService.RemoveAllAssets(Player, userRegion);
+			print(response);
+		}
+
 		return response;
+	},
+
+	GetRegions() {
+		return this.PlayerRegions;
 	},
 
 	PlaceAsset(Player: Player, AssetName: string, Position: CFrame) {
@@ -50,9 +80,21 @@ const RegionService = Knit.CreateService({
 		return toReturn;
 	},
 
+	RemoveAsset(Player: Player, Asset: BasePart) {
+		const userRegion = this.PlayerRegions.get(Player);
+		let toReturn = "You do not own a region!";
+		if (userRegion) {
+			toReturn = AssetService.RemoveAsset(Player, Asset, userRegion);
+		}
+		return toReturn;
+	},
+
 	KnitInit() {
 		print("Asset Service Initialized | Server");
-		Players.PlayerRemoving.Connect((player) => this.PlayerRegions.delete(player));
+		Players.PlayerRemoving.Connect((player) => {
+			this.ClearRegion(player);
+			this.PlayerRegions.delete(player);
+		});
 	},
 });
 

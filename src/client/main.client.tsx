@@ -7,6 +7,7 @@ import LevelService from "./Services/LevelService";
 import GoldService from "./Services/GoldService";
 import ShopService from "./Services/ShopService";
 import InventoryService from "./Services/InventoryService";
+import RegionService from "./Services/RegionService";
 
 const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
@@ -25,3 +26,4 @@ LevelService.init();
 GoldService.init();
 InventoryService.init();
 ShopService.init();
+RegionService.init();
