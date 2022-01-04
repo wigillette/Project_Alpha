@@ -1,6 +1,7 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 const RegionService = Knit.GetService("RegionService");
-import { Workspace } from "@rbxts/services";
+const InventoryService = Knit.GetService("InventoryService");
+import { Workspace, Players, ReplicatedStorage, UserInputService } from "@rbxts/services";
 import ObjectUtils from "@rbxts/object-utils";
 
 const RegionClient = {
@@ -18,6 +19,87 @@ const RegionClient = {
 		print(`Attempting to remove ${asset.Name}!`);
 		const response = RegionService.RemoveAsset(asset);
 		print(response);
+	},
+	LoadAssets: () => {
+		print(`Attempting to load asset data onto the region`);
+		const response = RegionService.LoadAssets();
+		print(response);
+	},
+	initAssetPlacement: (region: BasePart) => {
+		const clickDetector = region.FindFirstChildOfClass("ClickDetector");
+		const mouse = Players.LocalPlayer.GetMouse();
+		const assetsFolder = ReplicatedStorage.WaitForChild("Assets");
+		const allAssetsFolders = Workspace.FindFirstChild("RegionAssets");
+
+		function getMousePoint(X: number, Y: number, AssetsFolder: Folder) {
+			const raycastParams = new RaycastParams();
+			raycastParams.FilterType = Enum.RaycastFilterType.Blacklist;
+			raycastParams.FilterDescendantsInstances = AssetsFolder.GetChildren();
+			raycastParams.IgnoreWater = true;
+			const camera = Workspace.CurrentCamera;
+			if (camera) {
+				const camray = camera.ScreenPointToRay(X, Y);
+				const raycastResult = Workspace.Raycast(camray.Origin, camray.Direction.mul(2048), raycastParams);
+				return raycastResult;
+			}
+		}
+
+		if (allAssetsFolders) {
+			const regionAssetsFolder = allAssetsFolders.FindFirstChild(region.Name) as Folder;
+			if (regionAssetsFolder) {
+				let equipped: { Assets: string; Weapons: string };
+				let currentBlock: BasePart;
+				let newShadow: BasePart | undefined;
+				let mouseMoveConnection: RBXScriptConnection;
+				let resultPosition: Vector3;
+				let raycastResult: RaycastResult;
+				let mouseLocation: Vector2;
+				if (clickDetector) {
+					clickDetector.MouseHoverEnter.Connect(() => {
+						equipped = InventoryService.FetchEquipped();
+						currentBlock = assetsFolder.FindFirstChild(equipped.Assets) as BasePart;
+						if (currentBlock && newShadow === undefined) {
+							newShadow = currentBlock.Clone() as BasePart;
+							newShadow.Transparency = 0.75;
+							newShadow.Parent = regionAssetsFolder;
+
+							mouseMoveConnection = UserInputService.InputChanged.Connect((input, engine_processed) => {
+								if (!engine_processed) {
+									if (input.UserInputType === Enum.UserInputType.MouseMovement) {
+										mouseLocation = UserInputService.GetMouseLocation();
+										raycastResult = getMousePoint(
+											mouseLocation.X,
+											mouseLocation.Y,
+											regionAssetsFolder,
+										) as RaycastResult;
+										if (raycastResult) {
+											resultPosition = raycastResult.Position;
+											if (newShadow) {
+												newShadow.CFrame = new CFrame(resultPosition);
+											}
+										}
+									}
+								}
+							});
+						}
+					});
+					clickDetector.MouseHoverLeave.Connect(() => {
+						if (newShadow) {
+							newShadow.Destroy();
+							newShadow = undefined;
+						}
+						if (mouseMoveConnection) {
+							mouseMoveConnection.Disconnect();
+						}
+					});
+					clickDetector.MouseClick.Connect(() => {
+						if (equipped && newShadow) {
+							RegionClient.PlaceAsset(equipped.Assets, newShadow.CFrame);
+						}
+					});
+				}
+			}
+		}
 	},
 	initRegionSelection: () => {
 		const regionData = RegionService.GetRegions();
@@ -53,10 +135,13 @@ const RegionClient = {
 
 						regionFolder.GetChildren().forEach((region) => {
 							const clickDetector = region.FindFirstChildOfClass("ClickDetector");
-							if (clickDetector) {
+							if (clickDetector && region !== baseRegion) {
 								clickDetector.Destroy();
 							}
 						});
+
+						RegionClient.LoadAssets();
+						RegionClient.initAssetPlacement(baseRegion);
 					}
 				});
 				connections.push(hoverEnter);

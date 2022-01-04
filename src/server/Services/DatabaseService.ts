@@ -31,8 +31,10 @@ interface ProfileFormat {
 }
 
 interface AssetInfo {
-	Position: CFrame;
 	Name: string;
+	Position: LuaTuple<
+		[number, number, number, number, number, number, number, number, number, number, number, number]
+	>;
 }
 
 const DatabaseService = Knit.CreateService({

@@ -29,6 +29,9 @@ const InventoryService = Knit.CreateService({
 		FetchInventory(Player: Player) {
 			return this.Server.FetchInventory(Player);
 		},
+		FetchEquipped(Player: Player) {
+			return this.Server.FetchEquipped(Player);
+		},
 		EquipItem(Player: Player, ItemName: string, Category: string) {
 			return this.Server.EquipItem(Player, ItemName, Category);
 		},

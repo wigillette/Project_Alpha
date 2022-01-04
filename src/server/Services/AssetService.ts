@@ -1,8 +1,9 @@
-import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
+import { KnitServer as Knit } from "@rbxts/knit";
 import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Database from "@rbxts/datastore2";
 import InventoryService from "./InventoryService";
 import LevelService from "./LevelService";
+import ObjectUtils from "@rbxts/object-utils";
 
 declare global {
 	interface KnitServices {
@@ -13,6 +14,13 @@ declare global {
 interface AssetInfo {
 	Position: CFrame;
 	Name: string;
+}
+
+interface SerializedInfo {
+	Name: string;
+	Position: LuaTuple<
+		[number, number, number, number, number, number, number, number, number, number, number, number]
+	>;
 }
 
 const AssetService = Knit.CreateService({
@@ -30,19 +38,24 @@ const AssetService = Knit.CreateService({
 		const assetObject = this.AssetsFolder.FindFirstChild(AssetName);
 
 		if (ownsAsset && assetObject && userAssetInfo) {
-			// Clone the new object
-			const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
-			const newObject = assetObject.Clone() as BasePart;
-			newObject.Parent = assetFolder; // Change this to a folder for the user?
-			newObject.CFrame = Position.ToObjectSpace(Region.CFrame);
-			// Add experience
-			LevelService.AddExp(Player, 10);
-			// Update data
-			userAssetInfo.push({ Position: Position, Name: AssetName });
-			this.PlayerAssets.set(Player, userAssetInfo);
-			this.UpdateAssetData(Player, userAssetInfo);
-			// Update response
-			response = `${AssetName} Placement Successful`;
+			const distance = Region.CFrame.Position.sub(Position.Position);
+
+			if (distance.Magnitude < 100) {
+				// Check if it's within the distances
+				// Clone the new object
+				const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
+				const newObject = assetObject.Clone() as BasePart;
+				newObject.Parent = assetFolder; // Change this to a folder for the user?
+				newObject.CFrame = Position;
+				// Add experience
+				LevelService.AddExp(Player, 10);
+				// Update data
+				userAssetInfo.push({ Position: Position.ToObjectSpace(Region.CFrame), Name: AssetName });
+				this.PlayerAssets.set(Player, userAssetInfo);
+				this.UpdateAssetData(Player, userAssetInfo);
+				// Update response
+				response = `${AssetName} Placement Successful`;
+			}
 		}
 
 		return response;
@@ -87,7 +100,7 @@ const AssetService = Knit.CreateService({
 		return response;
 	},
 
-	RemoveAllAssets(Player: Player, Region: BasePart) {
+	RemoveAllAssets(Region: BasePart) {
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 		let response = "Region Assets folder does not exist!";
 		if (assetFolder) {
@@ -97,13 +110,34 @@ const AssetService = Knit.CreateService({
 		return response;
 	},
 
-	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {
-		const AssetStore = Database("AssetInfo", Player);
-		AssetStore.Set(AssetInfo);
+	EncodeAssetInfo(AssetInfo: AssetInfo[]) {
+		const serializedAssetInfo = [] as SerializedInfo[];
+		AssetInfo.forEach((entry) => {
+			serializedAssetInfo.push({ Name: entry.Name, Position: entry.Position.GetComponents() });
+		});
+		return serializedAssetInfo;
 	},
 
-	InitData(Player: Player, AssetInfo: AssetInfo[]) {
-		this.PlayerAssets.set(Player, AssetInfo);
+	DecodeAssetInfo(AssetInfo: SerializedInfo[]) {
+		const decodedAssetInfo = [] as AssetInfo[];
+		let tuple: [number, number, number, number, number, number, number, number, number, number, number, number];
+		AssetInfo.forEach((entry) => {
+			tuple = entry.Position;
+			decodedAssetInfo.push({ Name: entry.Name, Position: new CFrame(...tuple) });
+		});
+
+		return decodedAssetInfo;
+	},
+
+	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {
+		print(AssetInfo);
+		const AssetStore = Database("AssetInfo", Player);
+
+		AssetStore.Set(this.EncodeAssetInfo(AssetInfo));
+	},
+
+	InitData(Player: Player, AssetInfo: SerializedInfo[]) {
+		this.PlayerAssets.set(Player, this.DecodeAssetInfo(AssetInfo));
 	},
 
 	KnitInit() {
