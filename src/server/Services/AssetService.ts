@@ -47,28 +47,58 @@ const AssetService = Knit.CreateService({
 				const newObject = assetObject.Clone() as Model;
 				newObject.Parent = assetFolder; // Change this to a folder for the user?
 				newObject.SetPrimaryPartCFrame(Position);
-				// Add experience
-				LevelService.AddExp(Player, 10);
-				// Update data
-				userAssetInfo.push({ Position: Position.ToObjectSpace(Region.CFrame), Name: AssetName });
-				this.PlayerAssets.set(Player, userAssetInfo);
-				this.UpdateAssetData(Player, userAssetInfo);
-				// Update response
-				response = `${AssetName} Placement Successful`;
+				if (!this.isColliding(newObject)) {
+					// Add experience
+					LevelService.AddExp(Player, 10);
+					// Update data
+					userAssetInfo.push({ Position: Position.ToObjectSpace(Region.CFrame), Name: AssetName });
+					this.PlayerAssets.set(Player, userAssetInfo);
+					this.UpdateAssetData(Player, userAssetInfo);
+					// Update response
+					response = `${AssetName} Placement Successful`;
+				} else {
+					newObject.Destroy();
+				}
 			}
 		}
 
 		return response;
 	},
 
-	RemoveAsset(Player: Player, Asset: BasePart, Region: BasePart) {
+	isColliding(model: Model) {
+		const primaryPart = model.PrimaryPart;
+		if (primaryPart) {
+			const touch = primaryPart.Touched.Connect(() => {});
+			const touching = primaryPart.GetTouchingParts();
+			let isColliding = false;
+			touching.forEach((part) => {
+				if (!isColliding && !part.IsDescendantOf(model)) {
+					isColliding = true;
+				}
+			});
+
+			touch.Disconnect();
+			return isColliding;
+		}
+	},
+
+	RemoveAsset(Player: Player, Asset: Model, Region: BasePart) {
 		let response = `Failed to remove the asset`;
 		const userAssetInfo = this.PlayerAssets.get(Player);
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 		if (userAssetInfo && assetFolder) {
-			userAssetInfo.forEach((assetInfo) => {
-				if (Asset && assetInfo.Name === Asset.Name && assetInfo.Position === Asset.CFrame) {
+			userAssetInfo.forEach((assetInfo, index) => {
+				if (
+					Asset &&
+					assetInfo.Name === Asset.Name &&
+					Asset.PrimaryPart &&
+					(assetInfo.Position.ToObjectSpace(Region.CFrame) === Asset.GetPrimaryPartCFrame() ||
+						assetInfo.Position === Asset.GetPrimaryPartCFrame())
+				) {
 					Asset.Destroy();
+					userAssetInfo.remove(index);
+					this.PlayerAssets.set(Player, userAssetInfo);
+					this.UpdateAssetData(Player, userAssetInfo);
 					response = `${Player.Name} has successfully removed ${Asset.Name}`;
 				}
 			});
@@ -100,11 +130,13 @@ const AssetService = Knit.CreateService({
 		return response;
 	},
 
-	RemoveAllAssets(Region: BasePart) {
+	RemoveAllAssets(Player: Player, Region: BasePart) {
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 		let response = "Region Assets folder does not exist!";
 		if (assetFolder) {
 			response = `Successfully removed all assets from the Region ${Region.Name} folder`;
+			this.UpdateAssetData(Player, [] as AssetInfo[]);
+			this.PlayerAssets.set(Player, [] as AssetInfo[]);
 			assetFolder.ClearAllChildren();
 		}
 		return response;

@@ -24,7 +24,7 @@ const RegionService = Knit.CreateService({
 			return this.Server.PlaceAsset(Player, AssetName, Position);
 		},
 
-		RemoveAsset(Player: Player, Asset: BasePart) {
+		RemoveAsset(Player: Player, Asset: Model) {
 			return this.Server.RemoveAsset(Player, Asset);
 		},
 		LoadAssets(Player: Player) {
@@ -63,7 +63,7 @@ const RegionService = Knit.CreateService({
 		const userRegion = this.PlayerRegions.get(Player);
 		let response = `${Player.Name} does not have a region!`;
 		if (userRegion) {
-			response = AssetService.RemoveAllAssets(userRegion);
+			response = AssetService.RemoveAllAssets(Player, userRegion);
 			print(response);
 		}
 
@@ -92,7 +92,7 @@ const RegionService = Knit.CreateService({
 		return toReturn;
 	},
 
-	RemoveAsset(Player: Player, Asset: BasePart) {
+	RemoveAsset(Player: Player, Asset: Model) {
 		const userRegion = this.PlayerRegions.get(Player);
 		let toReturn = "You do not own a region!";
 		if (userRegion) {
