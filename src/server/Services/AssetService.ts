@@ -196,13 +196,11 @@ const AssetService = Knit.CreateService({
 	},
 
 	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {
-		print(AssetInfo);
 		const AssetStore = Database("AssetInfo", Player);
 		AssetStore.Set(this.EncodeAssetInfo(AssetInfo));
 	},
 
 	InitData(Player: Player, AssetInfo: SerializedInfo[]) {
-		print(AssetInfo);
 		this.PlayerAssets.set(Player, this.DecodeAssetInfo(AssetInfo));
 	},
 
