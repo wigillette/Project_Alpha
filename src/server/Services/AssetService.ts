@@ -1,9 +1,11 @@
 import { KnitServer as Knit } from "@rbxts/knit";
-import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, Workspace, TweenService } from "@rbxts/services";
 import Database from "@rbxts/datastore2";
 import InventoryService from "./InventoryService";
 import LevelService from "./LevelService";
 import ObjectUtils from "@rbxts/object-utils";
+import ShopItems from "../../shared/ShopItems";
+import GoldService from "./GoldService";
 
 declare global {
 	interface KnitServices {
@@ -45,9 +47,41 @@ const AssetService = Knit.CreateService({
 				// Clone the new object
 				const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 				const newObject = assetObject.Clone() as Model;
-				newObject.Parent = assetFolder; // Change this to a folder for the user?
-				newObject.SetPrimaryPartCFrame(Position);
-				if (!this.isColliding(newObject)) {
+				const objectInfo = ShopItems[AssetName as keyof typeof ShopItems];
+				if (newObject && objectInfo && !this.isColliding(newObject)) {
+					const health = new Instance("NumberValue");
+					health.Name = "ObjectHealth";
+					health.Value = objectInfo.Health;
+					health.Parent = newObject;
+					const healthConnection = health.GetPropertyChangedSignal("Value").Connect(() => {
+						if (health.Value <= 0) {
+							GoldService.AddGold(Player, -25);
+							let tween: Tween;
+							newObject.GetChildren().forEach((child) => {
+								if (child.IsA("BasePart")) {
+									tween = TweenService.Create(
+										child as BasePart,
+										new TweenInfo(
+											0.4,
+											Enum.EasingStyle.Quad,
+											Enum.EasingDirection.Out,
+											0,
+											false,
+											0,
+										),
+										{ Transparency: 1 },
+									);
+									tween.Play();
+								}
+							});
+							wait(0.45);
+							const resp = this.RemoveAsset(Player, newObject, Region);
+							print(resp);
+							healthConnection.Disconnect();
+						}
+					});
+					newObject.Parent = assetFolder;
+					newObject.SetPrimaryPartCFrame(Position);
 					// Add experience
 					LevelService.AddExp(Player, 10);
 					// Update data
@@ -56,8 +90,6 @@ const AssetService = Knit.CreateService({
 					this.UpdateAssetData(Player, userAssetInfo);
 					// Update response
 					response = `${AssetName} Placement Successful`;
-				} else {
-					newObject.Destroy();
 				}
 			}
 		}
@@ -123,20 +155,22 @@ const AssetService = Knit.CreateService({
 						print(`Failed to load ${asset.Name}!`);
 					}
 				});
+				response = "Successfully loaded assets";
 			}
-			response = "Successfully loaded assets";
 		}
 
 		return response;
 	},
 
-	RemoveAllAssets(Player: Player, Region: BasePart) {
+	RemoveAllAssets(Player: Player, Region: BasePart, save: boolean) {
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 		let response = "Region Assets folder does not exist!";
 		if (assetFolder) {
 			response = `Successfully removed all assets from the Region ${Region.Name} folder`;
-			this.UpdateAssetData(Player, [] as AssetInfo[]);
-			this.PlayerAssets.set(Player, [] as AssetInfo[]);
+			if (save) {
+				this.UpdateAssetData(Player, [] as AssetInfo[]);
+				this.PlayerAssets.set(Player, [] as AssetInfo[]);
+			}
 			assetFolder.ClearAllChildren();
 		}
 		return response;
@@ -162,11 +196,13 @@ const AssetService = Knit.CreateService({
 	},
 
 	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {
+		print(AssetInfo);
 		const AssetStore = Database("AssetInfo", Player);
 		AssetStore.Set(this.EncodeAssetInfo(AssetInfo));
 	},
 
 	InitData(Player: Player, AssetInfo: SerializedInfo[]) {
+		print(AssetInfo);
 		this.PlayerAssets.set(Player, this.DecodeAssetInfo(AssetInfo));
 	},
 

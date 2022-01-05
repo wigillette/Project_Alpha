@@ -42,7 +42,7 @@ const RegionClient = {
 	},
 	ClearRegion: () => {
 		print(`Clearing the assets from the region`);
-		RegionService.ClearRegion();
+		RegionService.ClearRegion(false);
 	},
 	initAssetPlacement: (region: BasePart) => {
 		const mouse = Players.LocalPlayer.GetMouse();
@@ -127,11 +127,24 @@ const RegionClient = {
 					}
 				};
 
+				const leaveMode = (name: string, state: Enum.UserInputState) => {
+					if (name === "LEAVE_MODE" && state === Enum.UserInputState.Begin) {
+						USER_STATE = "NONE";
+						if (RegionClient.shadow) {
+							RegionClient.shadow.Destroy();
+						}
+						if (currentSelectionBox) {
+							currentSelectionBox.Destroy();
+						}
+					}
+				};
+
 				ContextActionService.BindAction("ROTATE_X", rotateX, true, Enum.KeyCode.R);
 				ContextActionService.BindAction("ROTATE_Y", rotateY, true, Enum.KeyCode.T);
 				ContextActionService.BindAction("CLEAR", RegionClient.ClearRegion, true, Enum.KeyCode.F);
 				ContextActionService.BindAction("DELETE_MODE", deleteMode, true, Enum.KeyCode.E);
 				ContextActionService.BindAction("BUILD_MODE", buildMode, true, Enum.KeyCode.B);
+				ContextActionService.BindAction("LEAVE_MODE", leaveMode, true, Enum.KeyCode.Z);
 
 				let currentBlock: Model;
 
