@@ -40,13 +40,13 @@ const AssetService = Knit.CreateService({
 		if (ownsAsset && assetObject && userAssetInfo) {
 			const distance = Region.CFrame.Position.sub(Position.Position);
 
-			if (distance.Magnitude < 100) {
+			if (distance.Magnitude <= 85) {
 				// Check if it's within the distances
 				// Clone the new object
 				const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
-				const newObject = assetObject.Clone() as BasePart;
+				const newObject = assetObject.Clone() as Model;
 				newObject.Parent = assetFolder; // Change this to a folder for the user?
-				newObject.CFrame = Position;
+				newObject.SetPrimaryPartCFrame(Position);
 				// Add experience
 				LevelService.AddExp(Player, 10);
 				// Update data
@@ -86,9 +86,9 @@ const AssetService = Knit.CreateService({
 				userAssetInfo.forEach((asset) => {
 					const assetObject = this.AssetsFolder.FindFirstChild(asset.Name);
 					if (assetObject) {
-						const newObject = assetObject.Clone() as BasePart;
+						const newObject = assetObject.Clone() as Model;
 						newObject.Parent = assetFolder;
-						newObject.CFrame = asset.Position.ToObjectSpace(Region.CFrame);
+						newObject.SetPrimaryPartCFrame(asset.Position.ToObjectSpace(Region.CFrame));
 					} else {
 						print(`Failed to load ${asset.Name}!`);
 					}
@@ -130,9 +130,7 @@ const AssetService = Knit.CreateService({
 	},
 
 	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {
-		print(AssetInfo);
 		const AssetStore = Database("AssetInfo", Player);
-
 		AssetStore.Set(this.EncodeAssetInfo(AssetInfo));
 	},
 

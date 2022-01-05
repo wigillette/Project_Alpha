@@ -10,6 +10,7 @@ interface UIProps {
 	name: string;
 	category: string;
 	price: number;
+	response: { itemName: string; feedback: string };
 	onPurchase: (itemName: string, category: string) => void;
 }
 
@@ -116,6 +117,16 @@ class ShopItem extends Roact.Component<UIProps> {
 							SliceCenter={new Rect(10, 10, 10, 10)}
 						></imagelabel>
 					</frame>
+					<textlabel
+						ZIndex={5}
+						Text={this.props.response.itemName === this.props.name ? this.props.response.feedback : ""}
+						TextScaled={true}
+						Font={"TitilliumWeb"}
+						BackgroundTransparency={1}
+						Size={new UDim2(1, 0, 0.15, 0)}
+						AnchorPoint={new Vector2(0.5, 0.98)}
+						Position={new UDim2(0.5, 0, 0.98, 0)}
+					/>
 				</imagelabel>
 				<imagelabel
 					Image="http://www.roblox.com/asset/?id=5295627555"
@@ -133,13 +144,22 @@ class ShopItem extends Roact.Component<UIProps> {
 		);
 	}
 }
-
-export = RoactRodux.connect(undefined, (dispatch: DispatchParam<typeof Store>) => {
-	return {
-		onPurchase: (itemName: string, category: string) => {
-			dispatch(() => {
-				ShopService.PurchaseItem(itemName, category);
-			});
-		},
-	};
-})(ShopItem);
+interface ItemState {
+	purchaseItem: { response: { itemName: string; feedback: string } };
+}
+export = RoactRodux.connect(
+	function (state: ItemState, props) {
+		return {
+			response: state.purchaseItem.response,
+		};
+	},
+	(dispatch: DispatchParam<typeof Store>) => {
+		return {
+			onPurchase: (itemName: string, category: string) => {
+				dispatch(() => {
+					ShopService.PurchaseItem(itemName, category);
+				});
+			},
+		};
+	},
+)(ShopItem);

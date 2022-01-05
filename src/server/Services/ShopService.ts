@@ -21,6 +21,7 @@ const ShopService = Knit.CreateService({
 	},
 
 	PurchaseItem(Player: Player, ItemName: string, Category: string) {
+		let response = "D.N.E.";
 		if (ItemName in ShopItems) {
 			const itemInfo = ShopItems[ItemName as keyof typeof ShopItems];
 
@@ -31,10 +32,16 @@ const ShopService = Knit.CreateService({
 						GoldService.AddGold(Player, -itemInfo.Price); // Deduct the amount
 						InventoryService.AddToInventory(Player, ItemName, Category);
 						print(`${Player.Name} bought a ${ItemName} for ${itemInfo.Price}! | Server`);
+						response = "Purchased";
+					} else {
+						response = "Insufficient Gold";
 					}
+				} else {
+					response = "Owned";
 				}
 			}
 		}
+		return response;
 	},
 
 	FetchItems(Player: Player) {

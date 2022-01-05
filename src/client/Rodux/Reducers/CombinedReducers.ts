@@ -13,6 +13,7 @@ const reducer = Rodux.combineReducers({
 	toggleInventory: inventoryReducer,
 	changeTab: inventoryReducer,
 	equipItem: inventoryReducer,
+	purchaseItem: shopReducer,
 });
 
 export default reducer;
