@@ -35,8 +35,8 @@ const RegionService = Knit.CreateService({
 			return this.Server.GetRegions();
 		},
 
-		ClearRegion(Player: Player, save: boolean) {
-			return this.Server.ClearRegion(Player, save);
+		ClearRegion(Player: Player) {
+			return this.Server.ClearRegion(Player, true);
 		},
 	},
 
@@ -104,7 +104,7 @@ const RegionService = Knit.CreateService({
 	KnitInit() {
 		print("Asset Service Initialized | Server");
 		Players.PlayerRemoving.Connect((player) => {
-			this.ClearRegion(player, true);
+			this.ClearRegion(player, false);
 			this.PlayerRegions.delete(player);
 		});
 	},
