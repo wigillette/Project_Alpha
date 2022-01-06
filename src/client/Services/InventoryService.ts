@@ -1,6 +1,6 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 import Store from "../Rodux/ConfigureStore";
-import RegionService from "./RegionService";
+import AssetService from "./AssetService";
 const InventoryService = Knit.GetService("InventoryService");
 
 const InventoryClient = {
@@ -22,7 +22,7 @@ const InventoryClient = {
 			type: "equipItem",
 			equippedItems: equippedItems,
 		});
-		RegionService.UpdateEquipped(equippedItems);
+		AssetService.UpdateEquipped(equippedItems);
 	},
 	init: () => {
 		const initialInventory = InventoryService.FetchInventory();
