@@ -54,27 +54,19 @@ const AssetService = Knit.CreateService({
 					health.Value = objectInfo.Health;
 					health.Parent = newObject;
 					const healthConnection = health.GetPropertyChangedSignal("Value").Connect(() => {
+						let tween: Tween;
+						newObject.GetChildren().forEach((child) => {
+							if (child.IsA("BasePart")) {
+								tween = TweenService.Create(
+									child as BasePart,
+									new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+									{ Transparency: health.Value / objectInfo.Health },
+								);
+								tween.Play();
+							}
+						});
 						if (health.Value <= 0) {
 							GoldService.AddGold(Player, -25);
-							let tween: Tween;
-							newObject.GetChildren().forEach((child) => {
-								if (child.IsA("BasePart")) {
-									tween = TweenService.Create(
-										child as BasePart,
-										new TweenInfo(
-											0.4,
-											Enum.EasingStyle.Quad,
-											Enum.EasingDirection.Out,
-											0,
-											false,
-											0,
-										),
-										{ Transparency: 1 },
-									);
-									tween.Play();
-								}
-							});
-							wait(0.45);
 							const resp = this.RemoveAsset(Player, newObject, Region);
 							print(resp);
 							healthConnection.Disconnect();
@@ -161,6 +153,7 @@ const AssetService = Knit.CreateService({
 		if (userAssetInfo) {
 			const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 			if (assetFolder) {
+				print(userAssetInfo);
 				userAssetInfo.forEach((asset) => {
 					const assetObject = this.AssetsFolder.FindFirstChild(asset.Name);
 					if (assetObject) {
@@ -245,6 +238,7 @@ const AssetService = Knit.CreateService({
 
 	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {
 		const AssetStore = Database("AssetInfo", Player);
+		AssetStore.Set([]);
 		AssetStore.Set(this.EncodeAssetInfo(AssetInfo));
 	},
 

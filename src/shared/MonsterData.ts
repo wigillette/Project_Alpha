@@ -8,6 +8,16 @@ const MonsterData = {
 			Gold: 50,
 			Experience: 5,
 		},
+		["Freddy Krueger"]: {
+			Model: MonsterFolder.FindFirstChild("Freddy Krueger") as Model,
+			Gold: 100,
+			Experience: 50,
+		},
+		Jason: {
+			Model: MonsterFolder.FindFirstChild("Jason") as Model,
+			Gold: 100,
+			Experience: 50,
+		},
 	},
 	WaveDuration: {
 		MaxTime: 60,

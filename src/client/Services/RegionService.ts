@@ -340,7 +340,6 @@ const RegionClient = {
 							}
 						});
 
-						RegionClient.LoadAssets();
 						RegionClient.initAssetPlacement(baseRegion);
 					}
 				});
