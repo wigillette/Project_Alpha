@@ -27,6 +27,11 @@ const RegionService = Knit.CreateService({
 		RemoveAsset(Player: Player, Asset: Model) {
 			return this.Server.RemoveAsset(Player, Asset);
 		},
+
+		HealAsset(Player: Player, Asset: Model) {
+			return this.Server.HealAsset(Player, Asset);
+		},
+
 		LoadAssets(Player: Player) {
 			return this.Server.LoadAssets(Player);
 		},
@@ -97,6 +102,15 @@ const RegionService = Knit.CreateService({
 		let toReturn = "You do not own a region!";
 		if (userRegion) {
 			toReturn = AssetService.RemoveAsset(Player, Asset, userRegion);
+		}
+		return toReturn;
+	},
+
+	HealAsset(Player: Player, Asset: Model) {
+		const userRegion = this.PlayerRegions.get(Player);
+		let toReturn = "You do not own a region!";
+		if (userRegion) {
+			toReturn = AssetService.HealAsset(Player, Asset, userRegion);
 		}
 		return toReturn;
 	},

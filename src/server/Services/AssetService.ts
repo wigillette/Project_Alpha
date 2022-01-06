@@ -139,6 +139,22 @@ const AssetService = Knit.CreateService({
 		return response;
 	},
 
+	HealAsset(Player: Player, Asset: Model, Region: BasePart) {
+		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
+		let response = `Failed to heal ${Asset.Name}`;
+		if (Asset && assetFolder && Asset.IsDescendantOf(assetFolder)) {
+			const objectInfo = ShopItems[Asset.Name as keyof typeof ShopItems];
+			const objectHealth = Asset.FindFirstChild("ObjectHealth", true) as NumberValue;
+			if (objectHealth && objectHealth.Value < objectInfo.Health) {
+				objectHealth.Value = math.min(objectHealth.Value + 15, objectInfo.Health);
+				GoldService.AddGold(Player, -10);
+				response = `Successfully healed ${Asset.Name}!`;
+			}
+		}
+
+		return response;
+	},
+
 	LoadAssets(Player: Player, Region: BasePart) {
 		const userAssetInfo = this.PlayerAssets.get(Player);
 		let response = "Failed to load assets";
@@ -148,7 +164,39 @@ const AssetService = Knit.CreateService({
 				userAssetInfo.forEach((asset) => {
 					const assetObject = this.AssetsFolder.FindFirstChild(asset.Name);
 					if (assetObject) {
+						const objectInfo = ShopItems[asset.Name as keyof typeof ShopItems];
 						const newObject = assetObject.Clone() as Model;
+						const health = new Instance("NumberValue");
+						health.Name = "ObjectHealth";
+						health.Value = objectInfo.Health;
+						health.Parent = newObject;
+						const healthConnection = health.GetPropertyChangedSignal("Value").Connect(() => {
+							if (health.Value <= 0) {
+								GoldService.AddGold(Player, -25);
+								let tween: Tween;
+								newObject.GetChildren().forEach((child) => {
+									if (child.IsA("BasePart")) {
+										tween = TweenService.Create(
+											child as BasePart,
+											new TweenInfo(
+												0.4,
+												Enum.EasingStyle.Quad,
+												Enum.EasingDirection.Out,
+												0,
+												false,
+												0,
+											),
+											{ Transparency: 1 },
+										);
+										tween.Play();
+									}
+								});
+								wait(0.45);
+								const resp = this.RemoveAsset(Player, newObject, Region);
+								print(resp);
+								healthConnection.Disconnect();
+							}
+						});
 						newObject.Parent = assetFolder;
 						newObject.SetPrimaryPartCFrame(asset.Position.ToObjectSpace(Region.CFrame));
 					} else {

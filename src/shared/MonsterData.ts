@@ -10,8 +10,8 @@ const MonsterData = {
 		},
 	},
 	WaveDuration: {
-		MaxTime: 180,
-		MinTime: 60,
+		MaxTime: 60,
+		MinTime: 30,
 	},
 };
 

@@ -33,6 +33,11 @@ const RegionClient = {
 		const response = RegionService.LoadAssets();
 		print(response);
 	},
+	HealAsset: (asset: Model) => {
+		print(`Attempting to heal ${asset.Name}`);
+		const response = RegionService.HealAsset(asset);
+		print(response);
+	},
 	UpdateEquipped: (equipped: { Assets: string; Weapons: string }) => {
 		RegionClient.equipped = equipped;
 		if (RegionClient.shadow) {
@@ -42,7 +47,7 @@ const RegionClient = {
 	},
 	ClearRegion: () => {
 		print(`Clearing the assets from the region`);
-		RegionService.ClearRegion(false);
+		RegionService.ClearRegion();
 	},
 	initAssetPlacement: (region: BasePart) => {
 		const mouse = Players.LocalPlayer.GetMouse();
@@ -83,6 +88,18 @@ const RegionClient = {
 						currentPart.IsDescendantOf(regionAssetsFolder)
 					) {
 						RegionClient.RemoveAsset(currentPart.Parent);
+					}
+				};
+
+				const healAsset = () => {
+					const currentPart = mouse.Target;
+					if (
+						currentPart &&
+						currentPart.Parent &&
+						currentPart.Parent.IsA("Model") &&
+						currentPart.IsDescendantOf(regionAssetsFolder)
+					) {
+						RegionClient.HealAsset(currentPart.Parent);
 					}
 				};
 
@@ -127,6 +144,24 @@ const RegionClient = {
 					}
 				};
 
+				const healMode = (name: string, state: Enum.UserInputState) => {
+					if (name === "HEAL_MODE" && state === Enum.UserInputState.Begin) {
+						if (USER_STATE !== "HEAL_MODE") {
+							USER_STATE = "HEAL_MODE";
+							if (clickConnection !== undefined) {
+								clickConnection.Disconnect();
+							}
+							clickConnection = UserInputService.InputBegan.Connect((input, engine) => {
+								if (!engine) {
+									if (input.UserInputType === Enum.UserInputType.MouseButton1) {
+										healAsset();
+									}
+								}
+							});
+						}
+					}
+				};
+
 				const leaveMode = (name: string, state: Enum.UserInputState) => {
 					if (name === "LEAVE_MODE" && state === Enum.UserInputState.Begin) {
 						USER_STATE = "NONE";
@@ -145,6 +180,7 @@ const RegionClient = {
 				ContextActionService.BindAction("DELETE_MODE", deleteMode, true, Enum.KeyCode.E);
 				ContextActionService.BindAction("BUILD_MODE", buildMode, true, Enum.KeyCode.B);
 				ContextActionService.BindAction("LEAVE_MODE", leaveMode, true, Enum.KeyCode.Z);
+				ContextActionService.BindAction("HEAL_MODE", healMode, true, Enum.KeyCode.X);
 
 				let currentBlock: Model;
 
@@ -215,15 +251,37 @@ const RegionClient = {
 									mouse.Target.Parent &&
 									mouse.Target.Parent.IsA("Model") &&
 									mouse.Target.Parent.PrimaryPart &&
-									!mouse.Target.Parent.FindFirstChildOfClass("SelectionBox")
+									!mouse.Target.Parent.FindFirstChild("Delete")
 								) {
 									if (currentSelectionBox) {
 										currentSelectionBox.Destroy();
 										currentSelectionBox = undefined;
 									}
 									currentSelectionBox = new Instance("SelectionBox");
-									currentSelectionBox.Name = "Hover";
+									currentSelectionBox.Name = "Delete";
 									currentSelectionBox.Color3 = Color3.fromRGB(255, 0, 0);
+									currentSelectionBox.LineThickness = 0.3;
+									currentSelectionBox.Adornee = mouse.Target.Parent.PrimaryPart;
+									currentSelectionBox.Parent = mouse.Target.Parent;
+								}
+							} else if (USER_STATE === "HEAL_MODE") {
+								if (RegionClient.shadow) {
+									RegionClient.shadow.Destroy();
+									RegionClient.shadow = undefined;
+								}
+								if (
+									mouse.Target.Parent &&
+									mouse.Target.Parent.IsA("Model") &&
+									mouse.Target.Parent.PrimaryPart &&
+									!mouse.Target.Parent.FindFirstChild("Heal")
+								) {
+									if (currentSelectionBox) {
+										currentSelectionBox.Destroy();
+										currentSelectionBox = undefined;
+									}
+									currentSelectionBox = new Instance("SelectionBox");
+									currentSelectionBox.Name = "Heal";
+									currentSelectionBox.Color3 = Color3.fromRGB(0, 255, 0);
 									currentSelectionBox.LineThickness = 0.3;
 									currentSelectionBox.Adornee = mouse.Target.Parent.PrimaryPart;
 									currentSelectionBox.Parent = mouse.Target.Parent;
