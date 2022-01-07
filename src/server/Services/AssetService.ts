@@ -112,18 +112,22 @@ const AssetService = Knit.CreateService({
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 		if (userAssetInfo && assetFolder) {
 			userAssetInfo.forEach((assetInfo, index) => {
+				const objectCFrame = Asset.GetPrimaryPartCFrame().ToObjectSpace(Region.CFrame);
+				const roundedCFrame = new CFrame(objectCFrame.X, objectCFrame.Y, math.round(objectCFrame.Z));
 				if (
 					Asset &&
 					assetInfo.Name === Asset.Name &&
 					Asset.PrimaryPart &&
-					(assetInfo.Position.ToObjectSpace(Region.CFrame) === Asset.GetPrimaryPartCFrame() ||
-						assetInfo.Position === Asset.GetPrimaryPartCFrame())
+					assetInfo.Position.Position === roundedCFrame.Position
 				) {
 					Asset.Destroy();
 					userAssetInfo.remove(index);
 					this.PlayerAssets.set(Player, userAssetInfo);
 					this.UpdateAssetData(Player, userAssetInfo);
 					response = `${Player.Name} has successfully removed ${Asset.Name}`;
+				} else {
+					print(assetInfo.Position);
+					print(roundedCFrame);
 				}
 			});
 		}
@@ -238,7 +242,6 @@ const AssetService = Knit.CreateService({
 
 	UpdateAssetData(Player: Player, AssetInfo: AssetInfo[]) {
 		const AssetStore = Database("AssetInfo", Player);
-		AssetStore.Set([]);
 		AssetStore.Set(this.EncodeAssetInfo(AssetInfo));
 	},
 

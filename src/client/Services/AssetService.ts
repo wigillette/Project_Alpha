@@ -13,6 +13,7 @@ const AssetClient = {
 	equipped: {} as { Assets: string; Weapons: string },
 	shadow: undefined as Model | undefined,
 	rotation: { X: 0, Y: 0 },
+	region: undefined as BasePart | undefined,
 	_rotation: { X: 0, Y: 0 },
 	USER_STATE: "NONE",
 	currentSelectionBox: undefined as SelectionBox | undefined,
@@ -55,13 +56,17 @@ const AssetClient = {
 		RegionService.ClearRegion();
 	},
 	// Asset Managers
-	RotateX: () => {
-		AssetClient._rotation.X = (AssetClient._rotation.X + 1) % 4;
-		AssetClient.rotation.X *= math.pi * 0.5;
+	RotateX: (name: string, state: Enum.UserInputState) => {
+		if (name === "ROTATE_X" && state === Enum.UserInputState.Begin) {
+			AssetClient._rotation.X = (AssetClient._rotation.X + 1) % 4;
+			AssetClient.rotation.X = AssetClient._rotation.X * (math.pi / 2);
+		}
 	},
-	RotateY: () => {
-		AssetClient._rotation.X = (AssetClient._rotation.X + 1) % 4;
-		AssetClient.rotation.X *= math.pi * 0.5;
+	RotateY: (name: string, state: Enum.UserInputState) => {
+		if (name === "ROTATE_Y" && state === Enum.UserInputState.Begin) {
+			AssetClient._rotation.Y = (AssetClient._rotation.Y + 1) % 4;
+			AssetClient.rotation.Y = AssetClient._rotation.Y * (math.pi / 2);
+		}
 	},
 	ChangeState: (state: string) => {
 		let isNewState = false;
@@ -167,38 +172,48 @@ const AssetClient = {
 		}
 	},
 
-	UpdateShadow: (region: BasePart) => {
-		if (AssetClient.shadow && AssetClient.shadow.PrimaryPart) {
+	UpdateShadow: () => {
+		if (AssetClient.shadow && AssetClient.region && AssetClient.shadow.PrimaryPart) {
 			const unitRay = Workspace.CurrentCamera?.ScreenPointToRay(AssetClient.mouse.X, AssetClient.mouse.Y);
-			const ray = new Ray(unitRay?.Origin, unitRay?.Direction.mul(500));
-			const rayInfo = Workspace.FindPartOnRay(ray, AssetClient.shadow);
-			const pos = rayInfo[1];
-			const normal = rayInfo[2];
-			const platformBottom = region.CFrame.add(region.CFrame.UpVector.mul(region.Size.Y).mul(0.5));
-			const max = new Vector3(region.Size.X, AssetClient.HEIGHT, region.Size.Z);
-			const min = new Vector3(-max.X, 0, -max.Z);
+			if (unitRay) {
+				const ray = new Ray(unitRay.Origin, unitRay.Direction.mul(500));
+				const rayInfo = Workspace.FindPartOnRay(ray, AssetClient.shadow);
+				const pos = rayInfo[1];
+				const normal = rayInfo[2];
+				const platformBottom = AssetClient.region.CFrame.add(
+					AssetClient.region.CFrame.UpVector.mul(AssetClient.region.Size.Y).mul(0.5),
+				);
+				const max = new Vector3(AssetClient.region.Size.X, AssetClient.HEIGHT, AssetClient.region.Size.Z);
+				const min = new Vector3(-max.X, 0, -max.Z);
 
-			const lrot = CFrame.Angles(AssetClient.rotation.X, AssetClient.rotation.Y, 0);
-			let lsize = lrot.mul(AssetClient.shadow.GetExtentsSize()).mul(-1);
-			lsize = new Vector3(math.abs(lsize.X), math.abs(lsize.Y), math.abs(lsize.Z));
-			const lmax = max.sub(lsize).mul(0.5);
-			const lmin = min.add(lsize).mul(0.5);
-			const offset = normal.mul(lsize).mul(0.5);
-			let lpos = platformBottom.PointToObjectSpace(pos.add(offset));
-			lpos = new Vector3(
-				math.clamp(lpos.X, lmin.X, lmax.X),
-				math.clamp(lpos.Y, lmin.Y, lmax.Y),
-				math.clamp(lpos.Z, lmin.Z, lmax.Z),
-			);
-			lpos = new Vector3(
-				math.sign(lpos.X) *
-					(math.abs(lpos.X) - (math.abs(lpos.X) % AssetClient.GRID_SIZE) + (lmin.X % AssetClient.GRID_SIZE)),
-				math.sign(lpos.Y) *
-					(math.abs(lpos.Y) - (math.abs(lpos.Y) % AssetClient.GRID_SIZE) + (lmin.Y % AssetClient.GRID_SIZE)),
-				math.sign(lpos.Z) *
-					(math.abs(lpos.Z) - (math.abs(lpos.Z) % AssetClient.GRID_SIZE) + (lmin.Z % AssetClient.GRID_SIZE)),
-			);
-			AssetClient.shadow.SetPrimaryPartCFrame(platformBottom.ToWorldSpace(lrot.add(lpos)));
+				const lrot = CFrame.Angles(AssetClient.rotation.X, AssetClient.rotation.Y, 0);
+				let lsize = lrot.mul(AssetClient.shadow.GetExtentsSize()).mul(-1);
+				lsize = new Vector3(math.abs(lsize.X), math.abs(lsize.Y), math.abs(lsize.Z));
+				const lmax = max.sub(lsize).mul(0.5);
+				const lmin = min.add(lsize).mul(0.5);
+				const offset = normal.mul(lsize).mul(0.5);
+				let lpos = platformBottom.PointToObjectSpace(pos.add(offset));
+				lpos = new Vector3(
+					math.clamp(lpos.X, lmin.X, lmax.X),
+					math.clamp(lpos.Y, lmin.Y, lmax.Y),
+					math.clamp(lpos.Z, lmin.Z, lmax.Z),
+				);
+				lpos = new Vector3(
+					math.sign(lpos.X) *
+						(math.abs(lpos.X) -
+							(math.abs(lpos.X) % AssetClient.GRID_SIZE) +
+							(lmin.X % AssetClient.GRID_SIZE)),
+					math.sign(lpos.Y) *
+						(math.abs(lpos.Y) -
+							(math.abs(lpos.Y) % AssetClient.GRID_SIZE) +
+							(lmin.Y % AssetClient.GRID_SIZE)),
+					math.sign(lpos.Z) *
+						(math.abs(lpos.Z) -
+							(math.abs(lpos.Z) % AssetClient.GRID_SIZE) +
+							(lmin.Z % AssetClient.GRID_SIZE)),
+				);
+				AssetClient.shadow.SetPrimaryPartCFrame(platformBottom.ToWorldSpace(lrot.add(lpos)));
+			}
 		}
 	},
 
@@ -224,6 +239,7 @@ const AssetClient = {
 
 	// Initialize
 	init: (region: BasePart) => {
+		AssetClient.region = region;
 		AssetClient.regionAssetsFolder = AssetClient.allAssetsFolder.FindFirstChild(region.Name) as Folder;
 		if (AssetClient.regionAssetsFolder) {
 			// Initialize Action Handler Keybinds
@@ -248,7 +264,7 @@ const AssetClient = {
 							if (!AssetClient.shadow) {
 								AssetClient.CreateShadow();
 							}
-							AssetClient.UpdateShadow(region);
+							AssetClient.UpdateShadow();
 							break;
 						case "DELETE_MODE":
 							AssetClient.AddSelectionBox("Delete", Color3.fromRGB(255, 0, 0), target);

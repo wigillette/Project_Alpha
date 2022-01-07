@@ -33,6 +33,7 @@
   "dependencies": {
     "@rbxts/datastore2": "^1.4.0-ts.0",
     "@rbxts/knit": "^0.0.21-alpha.0",
+    "@rbxts/make": "^1.0.6",
     "@rbxts/object-utils": "^1.0.4",
     "@rbxts/roact": "^1.4.0-ts.2",
     "@rbxts/roact-hooks": "^0.3.0-ts.2",

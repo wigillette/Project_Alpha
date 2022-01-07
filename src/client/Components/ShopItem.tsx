@@ -1,10 +1,11 @@
 import Roact from "@rbxts/roact";
 import RoactRodux from "@rbxts/roact-rodux";
 import EffectsHandler from "../../shared/EffectsHandler";
-import RectButton from "./RectButton";
+import { ObjectViewport } from "./ObjectViewport";
 import Store from "../Rodux/ConfigureStore";
 import { DispatchParam } from "@rbxts/rodux";
 import ShopService from "../Services/ShopService";
+import { ReplicatedStorage } from "@rbxts/services";
 
 interface UIProps {
 	name: string;
@@ -13,19 +14,31 @@ interface UIProps {
 	response: { itemName: string; feedback: string };
 	onPurchase: (itemName: string, category: string) => void;
 }
+const assetsFolder = ReplicatedStorage.FindFirstChild("Assets");
+const weaponsFolder = ReplicatedStorage.FindFirstChild("Weapons");
 
 class ShopItem extends Roact.Component<UIProps> {
 	buttonRef;
+	cameraRef;
+	object: Model = new Instance("Model");
 
 	purchaseItem() {
 		const itemName = this.props.name;
 		const category = this.props.category;
+
 		this.props.onPurchase(itemName, category);
 	}
 
 	constructor(props: UIProps) {
 		super(props);
+
 		this.buttonRef = Roact.createRef<ImageButton>();
+		this.cameraRef = Roact.createRef<Camera>();
+		if (assetsFolder && weaponsFolder) {
+			this.object =
+				(assetsFolder.FindFirstChild(this.props.name) as Model) ||
+				(weaponsFolder.FindFirstChild(this.props.name) as Model);
+		}
 	}
 
 	render() {
@@ -57,6 +70,22 @@ class ShopItem extends Roact.Component<UIProps> {
 						TextScaled={true}
 						Text={this.props.name}
 					/>
+					<ObjectViewport
+						nativeProps={{
+							ZIndex: 3,
+							Position: new UDim2(0.5, 0, 0.45, 0),
+							Size: new UDim2(0.3, 0, 0.3, 0),
+							BackgroundTransparency: 1,
+							AnchorPoint: new Vector2(0.5, 0.6),
+						}}
+						instance={this.object.Clone() as Model}
+					>
+						<uiaspectratioconstraint
+							AspectRatio={1}
+							AspectType={"ScaleWithParentSize"}
+							DominantAxis={"Height"}
+						/>
+					</ObjectViewport>
 					<frame
 						BackgroundTransparency={1}
 						Position={new UDim2(0.5, 0, 0.8, 0)}
