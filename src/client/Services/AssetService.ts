@@ -1,5 +1,6 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 const RegionService = Knit.GetService("RegionService");
+const MonsterService = Knit.GetService("MonsterService");
 import {
 	Workspace,
 	Players,
@@ -24,6 +25,7 @@ const AssetClient = {
 	mouse: Players.LocalPlayer.GetMouse(),
 	clickConnection: undefined as RBXScriptConnection | undefined,
 	regionAssetsFolder: undefined as Folder | undefined,
+	disabled: false,
 
 	// Remote Handlers
 	PlaceAsset: (name: string, position: CFrame) => {
@@ -77,6 +79,7 @@ const AssetClient = {
 				AssetClient.clickConnection.Disconnect();
 				AssetClient.clickConnection = undefined;
 			}
+			AssetClient.CleanUp();
 		}
 		return isNewState;
 	},
@@ -237,19 +240,23 @@ const AssetClient = {
 		}
 	},
 
+	BindActions: () => {
+		ContextActionService.BindAction("ROTATE_X", AssetClient.RotateX, true, Enum.KeyCode.R);
+		ContextActionService.BindAction("ROTATE_Y", AssetClient.RotateY, true, Enum.KeyCode.T);
+		ContextActionService.BindAction("CLEAR", AssetClient.ClearRegion, true, Enum.KeyCode.F);
+		ContextActionService.BindAction("DELETE_MODE", AssetClient.DeleteMode, true, Enum.KeyCode.E);
+		ContextActionService.BindAction("BUILD_MODE", AssetClient.BuildMode, true, Enum.KeyCode.B);
+		ContextActionService.BindAction("LEAVE_MODE", AssetClient.LeaveMode, true, Enum.KeyCode.Z);
+		ContextActionService.BindAction("HEAL_MODE", AssetClient.HealMode, true, Enum.KeyCode.X);
+	},
+
 	// Initialize
 	init: (region: BasePart) => {
 		AssetClient.region = region;
 		AssetClient.regionAssetsFolder = AssetClient.allAssetsFolder.FindFirstChild(region.Name) as Folder;
 		if (AssetClient.regionAssetsFolder) {
 			// Initialize Action Handler Keybinds
-			ContextActionService.BindAction("ROTATE_X", AssetClient.RotateX, true, Enum.KeyCode.R);
-			ContextActionService.BindAction("ROTATE_Y", AssetClient.RotateY, true, Enum.KeyCode.T);
-			ContextActionService.BindAction("CLEAR", AssetClient.ClearRegion, true, Enum.KeyCode.F);
-			ContextActionService.BindAction("DELETE_MODE", AssetClient.DeleteMode, true, Enum.KeyCode.E);
-			ContextActionService.BindAction("BUILD_MODE", AssetClient.BuildMode, true, Enum.KeyCode.B);
-			ContextActionService.BindAction("LEAVE_MODE", AssetClient.LeaveMode, true, Enum.KeyCode.Z);
-			ContextActionService.BindAction("HEAL_MODE", AssetClient.HealMode, true, Enum.KeyCode.X);
+			AssetClient.BindActions();
 
 			// Initialize Hover RenderStepped
 			const renderConnection = RunService.RenderStepped.Connect(() => {
@@ -259,22 +266,36 @@ const AssetClient = {
 					AssetClient.regionAssetsFolder &&
 					(target === region || target.IsDescendantOf(AssetClient.regionAssetsFolder))
 				) {
-					switch (AssetClient.USER_STATE) {
-						case "BUILD_MODE":
-							if (!AssetClient.shadow) {
-								AssetClient.CreateShadow();
-							}
-							AssetClient.UpdateShadow();
-							break;
-						case "DELETE_MODE":
-							AssetClient.AddSelectionBox("Delete", Color3.fromRGB(255, 0, 0), target);
-							break;
-						case "HEAL_MODE":
-							AssetClient.AddSelectionBox("Heal", Color3.fromRGB(0, 255, 0), target);
-							break;
+					if (!MonsterService.isWaveRunning()) {
+						if (AssetClient.disabled) {
+							AssetClient.BindActions();
+							AssetClient.disabled = false;
+						}
+						switch (AssetClient.USER_STATE) {
+							case "BUILD_MODE":
+								if (!AssetClient.shadow) {
+									AssetClient.CreateShadow();
+								}
+								AssetClient.UpdateShadow();
+								break;
+							case "DELETE_MODE":
+								AssetClient.AddSelectionBox("Delete", Color3.fromRGB(255, 0, 0), target);
+								break;
+							case "HEAL_MODE":
+								AssetClient.AddSelectionBox("Heal", Color3.fromRGB(0, 255, 0), target);
+								break;
+						}
+					} else {
+						AssetClient.LeaveMode();
 					}
 				} else {
 					AssetClient.CleanUp();
+					ContextActionService.UnbindAction("ROTATE_X");
+					ContextActionService.UnbindAction("ROTATE_Y");
+					ContextActionService.UnbindAction("CLEAR");
+					ContextActionService.UnbindAction("DELETE_MODE");
+					ContextActionService.UnbindAction("BUILD_MODE");
+					AssetClient.disabled = true;
 				}
 			});
 		}

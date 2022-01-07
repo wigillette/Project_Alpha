@@ -1,9 +1,10 @@
 import GoldService from "./GoldService";
 import LevelService from "./LevelService";
 import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
-import { Players, Workspace, Lighting, TweenService, RunService } from "@rbxts/services";
+import { Players, Workspace, Lighting, TweenService, RunService, ReplicatedStorage } from "@rbxts/services";
 import MonsterData from "../../shared/MonsterData";
 import ObjectUtils from "@rbxts/object-utils";
+import InventoryService from "./InventoryService";
 
 declare global {
 	interface KnitServices {
@@ -22,6 +23,51 @@ const MonsterService = Knit.CreateService({
 
 	DeathConnections: [] as RBXScriptConnection[],
 	WAVE_RUNNING: false,
+
+	Client: {
+		isWaveRunning(Player: Player) {
+			return this.Server.isWaveRunning();
+		},
+	},
+
+	GiveWeapons() {
+		const weaponsFolder = ReplicatedStorage.WaitForChild("Weapons");
+		let equipped, weaponModel, weapon, newWeapon;
+		Players.GetPlayers().forEach((player) => {
+			equipped = InventoryService.FetchEquipped(player);
+			if (equipped) {
+				weaponModel = weaponsFolder.FindFirstChild(equipped.Weapons);
+				if (weaponModel) {
+					weapon = weaponModel.FindFirstChildOfClass("Tool");
+					if (weapon) {
+						newWeapon = weapon.Clone();
+						newWeapon.Parent = player.WaitForChild("Backpack");
+						newWeapon.Clone().Parent = player.WaitForChild("StarterGear");
+					}
+				}
+			}
+		});
+	},
+
+	isWaveRunning() {
+		return this.WAVE_RUNNING;
+	},
+
+	RemoveWeapons() {
+		Players.GetPlayers().forEach((player) => {
+			if (player) {
+				player.WaitForChild("Backpack").ClearAllChildren();
+				player.WaitForChild("StarterGear").ClearAllChildren();
+				const char = player.Character;
+				if (char) {
+					const tool = char.FindFirstChildOfClass("Tool");
+					if (tool) {
+						tool.Destroy();
+					}
+				}
+			}
+		});
+	},
 
 	SpawnMonsters(Duration: number) {
 		const monsterInfo = MonsterData.Monsters;
@@ -49,36 +95,7 @@ const MonsterService = Knit.CreateService({
 		);
 		tween.Play();
 
-		const findNearestTarget = (pos: Vector3) => {
-			let dist = 10000;
-			let chosen: BasePart | undefined = undefined;
-			if (regionAssetsFolder) {
-				Workspace.GetChildren().forEach((Child) => {
-					if (Child.IsA("Model")) {
-						const hum = Child.FindFirstChildOfClass("Humanoid") as Humanoid;
-						const hrp = Child.FindFirstChild("HumanoidRootPart") as BasePart;
-						if (hum && hrp && hum.Health > 0 && hrp.Position.sub(pos).Magnitude - 10 < dist) {
-							chosen = hrp;
-							dist = hrp.Position.sub(pos).Magnitude - 10;
-						}
-					}
-				});
-				regionAssetsFolder.GetChildren().forEach((Folder) => {
-					Folder.GetChildren().forEach((Child) => {
-						if (Child.IsA("Model")) {
-							if (Child.PrimaryPart && Child.PrimaryPart.Position.sub(pos).Magnitude < dist) {
-								const health = Child.FindFirstChild("ObjectHealth") as NumberValue;
-								if (health && health.Value > 0) {
-									chosen = Child.PrimaryPart;
-									dist = Child.PrimaryPart.Position.sub(pos).Magnitude;
-								}
-							}
-						}
-					});
-				});
-			}
-			return chosen;
-		};
+		this.GiveWeapons();
 
 		const monsterChoices = ObjectUtils.keys(monsterInfo);
 		for (let i = 0; i < Duration; i++) {
@@ -98,21 +115,7 @@ const MonsterService = Knit.CreateService({
 								this.onMonsterDeath(killer, randomMonster);
 							}
 						});
-						coroutine.wrap(() => {
-							do {
-								if (newMonsterModel) {
-									const hrp = newMonsterModel.FindFirstChild("HumanoidRootPart") as BasePart;
-									const hum = newMonsterModel.FindFirstChildOfClass("Humanoid") as Humanoid;
-									if (hrp && hum) {
-										const target = findNearestTarget(hrp.Position) as BasePart | undefined;
-										if (target) {
-											hum.MoveTo(target.Position, target);
-										}
-									}
-								}
-								wait(1);
-							} while (this.WAVE_RUNNING);
-						})();
+
 						this.DeathConnections.push(deathConnection);
 						newMonsterModel.Parent = spawnedFolder;
 						monsterPrimaryPart = newMonsterModel.PrimaryPart;
@@ -144,6 +147,7 @@ const MonsterService = Knit.CreateService({
 		);
 		tween.Play();
 		this.WAVE_RUNNING = false;
+		this.RemoveWeapons();
 	},
 
 	onMonsterDeath(Killer: Player, MonsterData: MonsterFormat) {

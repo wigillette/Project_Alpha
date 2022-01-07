@@ -60,7 +60,7 @@ const AssetService = Knit.CreateService({
 								tween = TweenService.Create(
 									child as BasePart,
 									new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
-									{ Transparency: health.Value / objectInfo.Health },
+									{ Transparency: (health.Value / objectInfo.Health) * -1 + 1 },
 								);
 								tween.Play();
 							}
@@ -92,7 +92,6 @@ const AssetService = Knit.CreateService({
 	isColliding(model: Model) {
 		const primaryPart = model.PrimaryPart;
 		if (primaryPart) {
-			const touch = primaryPart.Touched.Connect(() => {});
 			const touching = primaryPart.GetTouchingParts();
 			let isColliding = false;
 			touching.forEach((part) => {
@@ -101,7 +100,6 @@ const AssetService = Knit.CreateService({
 				}
 			});
 
-			touch.Disconnect();
 			return isColliding;
 		}
 	},
@@ -112,22 +110,19 @@ const AssetService = Knit.CreateService({
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 		if (userAssetInfo && assetFolder) {
 			userAssetInfo.forEach((assetInfo, index) => {
-				const objectCFrame = Asset.GetPrimaryPartCFrame().ToObjectSpace(Region.CFrame);
-				const roundedCFrame = new CFrame(objectCFrame.X, objectCFrame.Y, math.round(objectCFrame.Z));
-				if (
-					Asset &&
-					assetInfo.Name === Asset.Name &&
-					Asset.PrimaryPart &&
-					assetInfo.Position.Position === roundedCFrame.Position
-				) {
-					Asset.Destroy();
-					userAssetInfo.remove(index);
-					this.PlayerAssets.set(Player, userAssetInfo);
-					this.UpdateAssetData(Player, userAssetInfo);
-					response = `${Player.Name} has successfully removed ${Asset.Name}`;
-				} else {
-					print(assetInfo.Position);
-					print(roundedCFrame);
+				if (Asset && Asset.PrimaryPart) {
+					const objectCFrame = Asset.GetPrimaryPartCFrame().ToObjectSpace(Region.CFrame);
+					const roundedCFrame = new CFrame(objectCFrame.X, objectCFrame.Y, math.round(objectCFrame.Z));
+					if (assetInfo.Name === Asset.Name && assetInfo.Position.Position === roundedCFrame.Position) {
+						Asset.Destroy();
+						userAssetInfo.remove(index);
+						this.PlayerAssets.set(Player, userAssetInfo);
+						this.UpdateAssetData(Player, userAssetInfo);
+						response = `${Player.Name} has successfully removed ${Asset.Name}`;
+					} else {
+						print(assetInfo.Position.Position);
+						print(roundedCFrame.Position);
+					}
 				}
 			});
 		}
@@ -168,27 +163,26 @@ const AssetService = Knit.CreateService({
 						health.Value = objectInfo.Health;
 						health.Parent = newObject;
 						const healthConnection = health.GetPropertyChangedSignal("Value").Connect(() => {
+							let tween: Tween;
+							newObject.GetChildren().forEach((child) => {
+								if (child.IsA("BasePart")) {
+									tween = TweenService.Create(
+										child as BasePart,
+										new TweenInfo(
+											0.2,
+											Enum.EasingStyle.Quad,
+											Enum.EasingDirection.Out,
+											0,
+											false,
+											0,
+										),
+										{ Transparency: (health.Value / objectInfo.Health) * -1 + 1 },
+									);
+									tween.Play();
+								}
+							});
 							if (health.Value <= 0) {
 								GoldService.AddGold(Player, -25);
-								let tween: Tween;
-								newObject.GetChildren().forEach((child) => {
-									if (child.IsA("BasePart")) {
-										tween = TweenService.Create(
-											child as BasePart,
-											new TweenInfo(
-												0.4,
-												Enum.EasingStyle.Quad,
-												Enum.EasingDirection.Out,
-												0,
-												false,
-												0,
-											),
-											{ Transparency: 1 },
-										);
-										tween.Play();
-									}
-								});
-								wait(0.45);
 								const resp = this.RemoveAsset(Player, newObject, Region);
 								print(resp);
 								healthConnection.Disconnect();
