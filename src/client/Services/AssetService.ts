@@ -1,6 +1,7 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 const RegionService = Knit.GetService("RegionService");
 const MonsterService = Knit.GetService("MonsterService");
+import ChatService from "./ChatService";
 import {
 	Workspace,
 	Players,
@@ -9,6 +10,7 @@ import {
 	RunService,
 	ContextActionService,
 } from "@rbxts/services";
+import ChatClient from "./ChatService";
 
 const AssetClient = {
 	equipped: {} as { Assets: string; Weapons: string },
@@ -31,22 +33,22 @@ const AssetClient = {
 	PlaceAsset: (name: string, position: CFrame) => {
 		print(`Attempting to place ${name} at ${position}!`);
 		const response = RegionService.PlaceAsset(name, position);
-		print(response);
+		ChatClient.PostFeedback(response);
 	},
 	RemoveAsset: (asset: Model) => {
 		print(`Attempting to remove ${asset.Name}!`);
 		const response = RegionService.RemoveAsset(asset);
-		print(response);
+		ChatClient.PostFeedback(response);
 	},
 	LoadAssets: () => {
 		print(`Attempting to load asset data onto the region`);
 		const response = RegionService.LoadAssets();
-		print(response);
+		ChatClient.PostFeedback(response);
 	},
 	HealAsset: (asset: Model) => {
 		print(`Attempting to heal ${asset.Name}`);
 		const response = RegionService.HealAsset(asset);
-		print(response);
+		ChatClient.PostFeedback(response);
 	},
 	UpdateEquipped: (equipped: { Assets: string; Weapons: string }) => {
 		AssetClient.equipped = equipped;
@@ -56,6 +58,7 @@ const AssetClient = {
 	ClearRegion: () => {
 		print(`Clearing the assets from the region`);
 		RegionService.ClearRegion();
+		ChatClient.PostFeedback("Cleared the assets from the region");
 	},
 	// Asset Managers
 	RotateX: (name: string, state: Enum.UserInputState) => {
@@ -120,6 +123,7 @@ const AssetClient = {
 					AssetClient.PlaceAsset(AssetClient.equipped.Assets, AssetClient.shadow.GetPrimaryPartCFrame());
 				}
 			});
+			ChatClient.PostFeedback("You have entered Place Asset Mode!");
 		}
 	},
 	GetTarget: () => {
@@ -145,6 +149,7 @@ const AssetClient = {
 					AssetClient.RemoveAsset(target);
 				}
 			});
+			ChatClient.PostFeedback("You have entered Delete Asset Mode!");
 		}
 	},
 	HealMode: () => {
@@ -156,6 +161,7 @@ const AssetClient = {
 					AssetClient.HealAsset(target);
 				}
 			});
+			ChatClient.PostFeedback("You have entered Heal Asset Mode!");
 		}
 	},
 	CleanUp: () => {
@@ -172,6 +178,7 @@ const AssetClient = {
 		const isNewState = AssetClient.ChangeState("NONE");
 		if (isNewState) {
 			AssetClient.CleanUp();
+			ChatClient.PostFeedback("You have no mode enabled!");
 		}
 	},
 
@@ -285,7 +292,7 @@ const AssetClient = {
 								AssetClient.AddSelectionBox("Heal", Color3.fromRGB(0, 255, 0), target);
 								break;
 						}
-					} else {
+					} else if (AssetClient.USER_STATE !== "NONE") {
 						AssetClient.LeaveMode();
 						ContextActionService.UnbindAction("ROTATE_X");
 						ContextActionService.UnbindAction("ROTATE_Y");

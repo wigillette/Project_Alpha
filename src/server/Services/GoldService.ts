@@ -1,6 +1,7 @@
 import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
 import Database from "@rbxts/datastore2";
+import ChatService from "./ChatService";
 
 declare global {
 	interface KnitServices {
@@ -31,6 +32,11 @@ const GoldService = Knit.CreateService({
 			this.PlayerGold.set(Player, newGold);
 			this.Client.GoldChanged.Fire(Player, newGold);
 			this.UpdateGoldData(Player, newGold);
+			ChatService.PostFeedback(
+				Player,
+				`You have ${Amount > 0 ? "earned" : "lost"} ${Amount} gold!`,
+				Amount > 0 ? Color3.fromRGB(0, 180, 0) : Color3.fromRGB(180, 0, 0),
+			);
 		}
 	},
 

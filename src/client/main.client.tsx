@@ -8,6 +8,7 @@ import GoldService from "./Services/GoldService";
 import ShopService from "./Services/ShopService";
 import InventoryService from "./Services/InventoryService";
 import RegionService from "./Services/RegionService";
+import ChatService from "./Services/ChatService";
 
 const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
@@ -22,6 +23,7 @@ const app = Roact.createElement(
 );
 
 Roact.mount(app, playerGui, "App");
+ChatService.init();
 LevelService.init();
 GoldService.init();
 InventoryService.init();

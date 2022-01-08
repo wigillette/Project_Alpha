@@ -3,6 +3,7 @@ const RegionService = Knit.GetService("RegionService");
 import AssetService from "./AssetService";
 import { Workspace } from "@rbxts/services";
 import ObjectUtils from "@rbxts/object-utils";
+import ChatClient from "./ChatService";
 
 const RegionClient = {
 	equipped: {} as { Assets: string; Weapons: string },
@@ -33,6 +34,7 @@ const RegionClient = {
 				const onClick = newDetector.MouseClick.Connect(() => {
 					const canClaim = RegionClient.ClaimRegion(baseRegion);
 					if (canClaim) {
+						ChatClient.PostFeedback(`You have selected Region ${baseRegion.Name}!`);
 						baseRegion.BrickColor = new BrickColor("Medium stone grey");
 						const selectionBox = new Instance("SelectionBox");
 						selectionBox.Color3 = Color3.fromRGB(0, 255, 0);

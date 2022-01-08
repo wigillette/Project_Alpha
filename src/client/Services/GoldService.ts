@@ -1,6 +1,7 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 import Store from "../Rodux/ConfigureStore";
 const GoldService = Knit.GetService("GoldService");
+import ChatService from "./ChatService";
 
 const GoldClient = {
 	GoldChanged: (Gold: number) => {

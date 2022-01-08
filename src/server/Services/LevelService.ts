@@ -2,6 +2,7 @@ import { KnitServer as Knit, Signal, RemoteSignal } from "@rbxts/knit";
 import { Players } from "@rbxts/services";
 import LevelSettings from "../../shared/LevelSettings";
 import Database from "@rbxts/datastore2";
+import ChatService from "./ChatService";
 
 declare global {
 	interface KnitServices {
@@ -43,6 +44,7 @@ const LevelService = Knit.CreateService({
 				exp -= expCap;
 				expCap = LevelSettings.CalculateCap(level);
 				print(`${Player.Name} has leveled up! | Server`);
+				ChatService.PostFeedback(Player, `You have leveled up to level ${level}!`, Color3.fromRGB(0, 180, 0));
 			}
 
 			const newStats = { Experience: exp, Level: level, ExperienceCap: expCap };

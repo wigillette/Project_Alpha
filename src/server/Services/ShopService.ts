@@ -2,6 +2,7 @@ import GoldService from "./GoldService";
 import InventoryService from "./InventoryService";
 import ShopItems from "../../shared/ShopItems";
 import { KnitServer as Knit, RemoteSignal } from "@rbxts/knit";
+import ChatService from "./ChatService";
 
 declare global {
 	interface KnitServices {
@@ -33,11 +34,22 @@ const ShopService = Knit.CreateService({
 						InventoryService.AddToInventory(Player, ItemName, Category);
 						print(`${Player.Name} bought a ${ItemName} for ${itemInfo.Price}! | Server`);
 						response = "Purchased";
+						ChatService.PostFeedback(
+							Player,
+							`You have successfully purchased a ${ItemName}!`,
+							Color3.fromRGB(0, 180, 0),
+						);
 					} else {
 						response = "Insufficient Gold";
+						ChatService.PostFeedback(
+							Player,
+							`You do not have enough gold to purchase ${ItemName}!`,
+							Color3.fromRGB(180, 0, 0),
+						);
 					}
 				} else {
 					response = "Owned";
+					ChatService.PostFeedback(Player, `You already own a ${ItemName}!`, Color3.fromRGB(180, 0, 0));
 				}
 			}
 		}

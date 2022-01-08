@@ -5,6 +5,7 @@ import { Players, Workspace, Lighting, TweenService, RunService, ReplicatedStora
 import MonsterData from "../../shared/MonsterData";
 import ObjectUtils from "@rbxts/object-utils";
 import InventoryService from "./InventoryService";
+import ChatService from "./ChatService";
 
 declare global {
 	interface KnitServices {
@@ -95,6 +96,10 @@ const MonsterService = Knit.CreateService({
 		);
 		tween.Play();
 
+		ChatService.PostAllFeedback(
+			`Survive the incoming monster wave for ${Duration} seconds!`,
+			Color3.fromRGB(255, 0, 0),
+		);
 		this.GiveWeapons();
 
 		const monsterChoices = ObjectUtils.keys(monsterInfo);
@@ -148,6 +153,7 @@ const MonsterService = Knit.CreateService({
 		tween.Play();
 		this.WAVE_RUNNING = false;
 		this.RemoveWeapons();
+		ChatService.PostAllFeedback(`The monster wave has ended!`, Color3.fromRGB(255, 0, 0));
 	},
 
 	onMonsterDeath(Killer: Player, MonsterData: MonsterFormat) {
