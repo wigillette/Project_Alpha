@@ -48,7 +48,7 @@ const AssetService = Knit.CreateService({
 				const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
 				const newObject = assetObject.Clone() as Model;
 				const objectInfo = ShopItems[AssetName as keyof typeof ShopItems];
-				if (newObject && objectInfo && !this.isColliding(newObject)) {
+				if (newObject && objectInfo) {
 					const health = new Instance("NumberValue");
 					health.Name = "ObjectHealth";
 					health.Value = objectInfo.Health;
@@ -74,14 +74,19 @@ const AssetService = Knit.CreateService({
 					});
 					newObject.Parent = assetFolder;
 					newObject.SetPrimaryPartCFrame(Position);
-					// Add experience
-					LevelService.AddExp(Player, 10);
-					// Update data
-					userAssetInfo.push({ Position: Position.ToObjectSpace(Region.CFrame), Name: AssetName });
-					this.PlayerAssets.set(Player, userAssetInfo);
-					this.UpdateAssetData(Player, userAssetInfo);
-					// Update response
-					response = `${AssetName} Placement Successful`;
+					if (this.isColliding(newObject, Region)) {
+						newObject.Destroy();
+						response = `${AssetName} is colliding with other assets!`;
+					} else {
+						// Add experience
+						LevelService.AddExp(Player, 10);
+						// Update data
+						userAssetInfo.push({ Position: Position.ToObjectSpace(Region.CFrame), Name: AssetName });
+						this.PlayerAssets.set(Player, userAssetInfo);
+						this.UpdateAssetData(Player, userAssetInfo);
+						// Update response
+						response = `${AssetName} Placement Successful`;
+					}
 				}
 			}
 		}
@@ -89,19 +94,26 @@ const AssetService = Knit.CreateService({
 		return response;
 	},
 
-	isColliding(model: Model) {
-		const primaryPart = model.PrimaryPart;
-		if (primaryPart) {
-			const touching = primaryPart.GetTouchingParts();
-			let isColliding = false;
-			touching.forEach((part) => {
-				if (!isColliding && !part.IsDescendantOf(model)) {
-					isColliding = true;
-				}
-			});
+	isColliding(model: Model, region: BasePart) {
+		const assetsFolder = Workspace.WaitForChild("RegionAssets").FindFirstChild(region.Name);
+		let isColliding = false;
 
-			return isColliding;
+		if (assetsFolder) {
+			const primaryPart = model.PrimaryPart;
+			if (primaryPart) {
+				const touchConnection = primaryPart.Touched.Connect(() => {});
+				const touching = primaryPart.GetTouchingParts();
+				print(touching);
+				touching.forEach((part) => {
+					if (!isColliding && part.IsDescendantOf(assetsFolder) && !part.IsDescendantOf(model)) {
+						isColliding = true;
+					}
+				});
+
+				touchConnection.Disconnect();
+			}
 		}
+		return isColliding;
 	},
 
 	RemoveAsset(Player: Player, Asset: Model, Region: BasePart) {

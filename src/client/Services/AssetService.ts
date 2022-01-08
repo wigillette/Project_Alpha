@@ -273,7 +273,7 @@ const AssetClient = {
 						}
 						switch (AssetClient.USER_STATE) {
 							case "BUILD_MODE":
-								if (!AssetClient.shadow) {
+								if (AssetClient.shadow === undefined) {
 									AssetClient.CreateShadow();
 								}
 								AssetClient.UpdateShadow();
@@ -287,15 +287,15 @@ const AssetClient = {
 						}
 					} else {
 						AssetClient.LeaveMode();
+						ContextActionService.UnbindAction("ROTATE_X");
+						ContextActionService.UnbindAction("ROTATE_Y");
+						ContextActionService.UnbindAction("CLEAR");
+						ContextActionService.UnbindAction("DELETE_MODE");
+						ContextActionService.UnbindAction("BUILD_MODE");
+						AssetClient.disabled = true;
 					}
 				} else {
 					AssetClient.CleanUp();
-					ContextActionService.UnbindAction("ROTATE_X");
-					ContextActionService.UnbindAction("ROTATE_Y");
-					ContextActionService.UnbindAction("CLEAR");
-					ContextActionService.UnbindAction("DELETE_MODE");
-					ContextActionService.UnbindAction("BUILD_MODE");
-					AssetClient.disabled = true;
 				}
 			});
 		}

@@ -1,10 +1,5 @@
 import { KnitServer as Knit } from "@rbxts/knit";
 import { ServerScriptService } from "@rbxts/services";
-import LevelService from "./Services/LevelService";
-import GoldService from "./Services/GoldService";
-import { Players } from "@rbxts/services";
+
 Knit.AddServices(ServerScriptService.WaitForChild("TS").WaitForChild("Services"));
 Knit.Start();
-wait(3);
-LevelService.AddExp(Players.GetPlayers()[0], 1000);
-GoldService.AddGold(Players.GetPlayers()[0], 1000);
