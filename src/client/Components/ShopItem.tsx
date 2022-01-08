@@ -22,13 +22,6 @@ class ShopItem extends Roact.Component<UIProps> {
 	cameraRef;
 	object: Model = new Instance("Model");
 
-	purchaseItem() {
-		const itemName = this.props.name;
-		const category = this.props.category;
-
-		this.props.onPurchase(itemName, category);
-	}
-
 	constructor(props: UIProps) {
 		super(props);
 
@@ -39,6 +32,13 @@ class ShopItem extends Roact.Component<UIProps> {
 				(assetsFolder.FindFirstChild(this.props.name) as Model) ||
 				(weaponsFolder.FindFirstChild(this.props.name) as Model);
 		}
+	}
+
+	purchaseItem() {
+		const itemName = this.props.name;
+		const category = this.props.category;
+
+		this.props.onPurchase(itemName, category);
 	}
 
 	render() {

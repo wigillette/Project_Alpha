@@ -9,38 +9,9 @@ interface IProps {
 	instance: BasePart | Model;
 }
 
-/*
-local function setRotationEvent(model)
-	local currentAngle = 0
-	local modelCF, modelSize = model:GetBoundingBox()	
-	
-	local rotInv = (modelCF - modelCF.p):inverse()
-	modelCF = modelCF * rotInv
-	modelSize = rotInv * modelSize
-	modelSize = Vector3.new(math.abs(modelSize.x), math.abs(modelSize.y), math.abs(modelSize.z))
-	
-	local diagonal = 0
-	local maxExtent = math.max(modelSize.x, modelSize.y, modelSize.z)
-	local tan = math.tan(math.rad(camera.FieldOfView/2))
-	
-	if (maxExtent == modelSize.x) then
-		diagonal = math.sqrt(modelSize.y*modelSize.y + modelSize.z*modelSize.z)/2
-	elseif (maxExtent == modelSize.y) then
-		diagonal = math.sqrt(modelSize.x*modelSize.x + modelSize.z*modelSize.z)/2
-	else
-		diagonal = math.sqrt(modelSize.x*modelSize.x + modelSize.y*modelSize.y)/2
-	end
-	
-	local minDist = (maxExtent/2)/tan + diagonal
+const connections: RBXScriptConnection[] = [];
 
-	return game:GetService("RunService").RenderStepped:Connect(function(dt)
-		currentAngle = currentAngle + 1*dt*60
-		camera.CFrame = modelCF * CFrame.fromEulerAnglesYXZ(0, math.rad(currentAngle), 0) * CFrame.new(0, 0, minDist + 3)
-	end)
-end
-*/
-
-function setDefaultCameraView(camera: Camera, model: Model) {
+const setDefaultCameraView = (camera: Camera, model: Model) => {
 	let currentAngle = 0;
 	let [modelCF, modelSize] = model.GetBoundingBox();
 	const rotInv = modelCF.sub(modelCF.Position).Inverse();
@@ -64,14 +35,22 @@ function setDefaultCameraView(camera: Camera, model: Model) {
 	camera.FieldOfView = 30;
 
 	coroutine.wrap(() => {
-		RunService.RenderStepped.Connect((dt) => {
+		const connection = RunService.RenderStepped.Connect((dt) => {
 			currentAngle += 1 * dt * 60;
 			camera.CFrame = modelCF
 				.mul(CFrame.fromEulerAnglesYXZ(0, math.rad(currentAngle), 0))
 				.mul(new CFrame(0, 0, minDist + 3));
 		});
+		connections.push(connection);
 	})();
-}
+};
+
+const disconnectConnections = () => {
+	connections.forEach((connection, index) => {
+		connection.Disconnect();
+		connections.remove(index);
+	});
+};
 
 const InnerObjectViewport: Hooks.FC<IProps> = (props, hooks) => {
 	// Setup the viewport after mounting when we have a ref to it

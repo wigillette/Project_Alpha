@@ -101,7 +101,7 @@ const RegionService = Knit.CreateService({
 		const userRegion = this.PlayerRegions.get(Player);
 		let toReturn = "You do not own a region!";
 		if (userRegion) {
-			toReturn = AssetService.RemoveAsset(Player, Asset, userRegion);
+			toReturn = AssetService.RemoveAsset(Player, Asset, userRegion, false);
 		}
 		return toReturn;
 	},

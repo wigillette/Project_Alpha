@@ -4,6 +4,8 @@ import EffectsHandler from "../../shared/EffectsHandler";
 import Store from "../Rodux/ConfigureStore";
 import { DispatchParam } from "@rbxts/rodux";
 import InventoryService from "../Services/InventoryService";
+import { ObjectViewport } from "./ObjectViewport";
+import { ReplicatedStorage } from "@rbxts/services";
 
 interface UIProps {
 	name: string;
@@ -11,9 +13,27 @@ interface UIProps {
 	onEquip: (itemName: string, category: string) => void;
 	equippedItems: { Weapons: string; Assets: string };
 }
+const assetsFolder = ReplicatedStorage.FindFirstChild("Assets");
+const weaponsFolder = ReplicatedStorage.FindFirstChild("Weapons");
 
 class InventoryItem extends Roact.Component<UIProps> {
-	buttonRef = Roact.createRef<ImageButton>();
+	buttonRef;
+	cameraRef;
+	object: Model = new Instance("Model");
+
+	constructor(props: UIProps) {
+		super(props);
+
+		this.buttonRef = Roact.createRef<ImageButton>();
+		this.cameraRef = Roact.createRef<Camera>();
+		if (assetsFolder && weaponsFolder) {
+			this.object =
+				(assetsFolder.FindFirstChild(this.props.name) as Model) ||
+				(weaponsFolder.FindFirstChild(this.props.name) as Model);
+
+			print(this.object.Name);
+		}
+	}
 
 	equipItem() {
 		if (
@@ -55,6 +75,22 @@ class InventoryItem extends Roact.Component<UIProps> {
 						TextScaled={true}
 						Text={this.props.name}
 					/>
+					<ObjectViewport
+						nativeProps={{
+							ZIndex: 3,
+							Position: new UDim2(0.5, 0, 0.45, 0),
+							Size: new UDim2(0.3, 0, 0.3, 0),
+							BackgroundTransparency: 1,
+							AnchorPoint: new Vector2(0.5, 0.6),
+						}}
+						instance={this.object.Clone() as Model}
+					>
+						<uiaspectratioconstraint
+							AspectRatio={1}
+							AspectType={"ScaleWithParentSize"}
+							DominantAxis={"Height"}
+						/>
+					</ObjectViewport>
 					<frame
 						BackgroundTransparency={1}
 						Position={new UDim2(0.5, 0, 0.8, 0)}

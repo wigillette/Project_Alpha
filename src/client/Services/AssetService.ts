@@ -33,12 +33,16 @@ const AssetClient = {
 	PlaceAsset: (name: string, position: CFrame) => {
 		print(`Attempting to place ${name} at ${position}!`);
 		const response = RegionService.PlaceAsset(name, position);
-		ChatClient.PostFeedback(response);
+		if (response !== "true") {
+			ChatClient.PostFeedback(response);
+		}
 	},
 	RemoveAsset: (asset: Model) => {
 		print(`Attempting to remove ${asset.Name}!`);
 		const response = RegionService.RemoveAsset(asset);
-		ChatClient.PostFeedback(response);
+		if (response !== "true") {
+			ChatClient.PostFeedback(response);
+		}
 	},
 	LoadAssets: () => {
 		print(`Attempting to load asset data onto the region`);
@@ -292,14 +296,20 @@ const AssetClient = {
 								AssetClient.AddSelectionBox("Heal", Color3.fromRGB(0, 255, 0), target);
 								break;
 						}
-					} else if (AssetClient.USER_STATE !== "NONE") {
-						AssetClient.LeaveMode();
-						ContextActionService.UnbindAction("ROTATE_X");
-						ContextActionService.UnbindAction("ROTATE_Y");
-						ContextActionService.UnbindAction("CLEAR");
-						ContextActionService.UnbindAction("DELETE_MODE");
-						ContextActionService.UnbindAction("BUILD_MODE");
-						AssetClient.disabled = true;
+					} else {
+						if (AssetClient.USER_STATE !== "NONE") {
+							if (AssetClient.USER_STATE !== "HEAL_MODE") {
+								AssetClient.LeaveMode();
+								ContextActionService.UnbindAction("ROTATE_X");
+								ContextActionService.UnbindAction("ROTATE_Y");
+								ContextActionService.UnbindAction("CLEAR");
+								ContextActionService.UnbindAction("DELETE_MODE");
+								ContextActionService.UnbindAction("BUILD_MODE");
+								AssetClient.disabled = true;
+							} else {
+								AssetClient.AddSelectionBox("Heal", Color3.fromRGB(0, 255, 0), target);
+							}
+						}
 					}
 				} else {
 					AssetClient.CleanUp();

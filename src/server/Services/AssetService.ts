@@ -6,6 +6,7 @@ import LevelService from "./LevelService";
 import ObjectUtils from "@rbxts/object-utils";
 import ShopItems from "../../shared/ShopItems";
 import GoldService from "./GoldService";
+import MonsterService from "./MonsterService";
 
 declare global {
 	interface KnitServices {
@@ -39,7 +40,7 @@ const AssetService = Knit.CreateService({
 		const ownsAsset = InventoryService.ContainsItem(Player, AssetName, "Assets");
 		const assetObject = this.AssetsFolder.FindFirstChild(AssetName);
 
-		if (ownsAsset && assetObject && userAssetInfo) {
+		if (!MonsterService.isWaveRunning() && ownsAsset && assetObject && userAssetInfo) {
 			const distance = Region.CFrame.Position.sub(Position.Position);
 
 			if (distance.Magnitude <= 85) {
@@ -67,7 +68,7 @@ const AssetService = Knit.CreateService({
 						});
 						if (health.Value <= 0) {
 							GoldService.AddGold(Player, -25);
-							const resp = this.RemoveAsset(Player, newObject, Region);
+							const resp = this.RemoveAsset(Player, newObject, Region, true);
 							print(resp);
 							healthConnection.Disconnect();
 						}
@@ -85,7 +86,7 @@ const AssetService = Knit.CreateService({
 						this.PlayerAssets.set(Player, userAssetInfo);
 						this.UpdateAssetData(Player, userAssetInfo);
 						// Update response
-						response = `${AssetName} Placement Successful`;
+						response = "true";
 					}
 				}
 			}
@@ -116,11 +117,11 @@ const AssetService = Knit.CreateService({
 		return isColliding;
 	},
 
-	RemoveAsset(Player: Player, Asset: Model, Region: BasePart) {
+	RemoveAsset(Player: Player, Asset: Model, Region: BasePart, FromMonster: boolean) {
 		let response = `Failed to remove the asset`;
 		const userAssetInfo = this.PlayerAssets.get(Player);
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
-		if (Asset && Asset.PrimaryPart) {
+		if ((FromMonster || !MonsterService.isWaveRunning()) && Asset && Asset.PrimaryPart) {
 			const objectCFrame = Asset.GetPrimaryPartCFrame();
 			let currentAssetCFrame;
 			let minDist = 1000000;
@@ -140,7 +141,7 @@ const AssetService = Knit.CreateService({
 				userAssetInfo.remove(minIndex);
 				this.PlayerAssets.set(Player, userAssetInfo);
 				this.UpdateAssetData(Player, userAssetInfo);
-				response = `${Player.Name} has successfully removed ${Asset.Name}`;
+				response = "true";
 			}
 		}
 
@@ -200,7 +201,7 @@ const AssetService = Knit.CreateService({
 							});
 							if (health.Value <= 0) {
 								GoldService.AddGold(Player, -25);
-								const resp = this.RemoveAsset(Player, newObject, Region);
+								const resp = this.RemoveAsset(Player, newObject, Region, true);
 								print(resp);
 								healthConnection.Disconnect();
 							}

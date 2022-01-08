@@ -111,13 +111,16 @@ const MonsterService = Knit.CreateService({
 				monsterModel = randomMonster.Model as Model;
 				if (monsterModel) {
 					newMonsterModel = monsterModel.Clone();
-					humanoid = newMonsterModel.FindFirstChildOfClass("Humanoid");
+					humanoid = newMonsterModel.FindFirstChildOfClass("Humanoid") as Humanoid;
 					if (humanoid) {
 						deathConnection = humanoid.Died.Connect(() => {
-							killerTag = newMonsterModel.FindFirstChild("KillerTag") as ObjectValue;
-							if (killerTag && killerTag.Value) {
-								killer = killerTag.Value as Player;
-								this.onMonsterDeath(killer, randomMonster);
+							humanoid = newMonsterModel.FindFirstChildOfClass("Humanoid") as Humanoid;
+							if (humanoid) {
+								killerTag = humanoid.FindFirstChild("KillerTag") as ObjectValue;
+								if (killerTag && killerTag.Value) {
+									killer = killerTag.Value as Player;
+									this.onMonsterDeath(killer, randomMonster);
+								}
 							}
 						});
 

@@ -1,7 +1,7 @@
 import { KnitClient as Knit } from "@rbxts/knit";
 const RegionService = Knit.GetService("RegionService");
 import AssetService from "./AssetService";
-import { Workspace } from "@rbxts/services";
+import { Workspace, TweenService } from "@rbxts/services";
 import ObjectUtils from "@rbxts/object-utils";
 import ChatClient from "./ChatService";
 
@@ -26,16 +26,31 @@ const RegionClient = {
 				newDetector.CursorIcon = "rbxassetid://";
 				newDetector.Parent = baseRegion;
 				const hoverEnter = newDetector.MouseHoverEnter.Connect(() => {
-					baseRegion.BrickColor = new BrickColor("Bright green");
+					const tween = TweenService.Create(
+						baseRegion,
+						new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+						{ Color: new BrickColor("Bright green").Color },
+					);
+					tween.Play();
 				});
 				const hoverLeave = newDetector.MouseHoverLeave.Connect(() => {
-					baseRegion.BrickColor = new BrickColor("Medium stone grey");
+					const tween = TweenService.Create(
+						baseRegion,
+						new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+						{ Color: new BrickColor("Medium stone grey").Color },
+					);
+					tween.Play();
 				});
 				const onClick = newDetector.MouseClick.Connect(() => {
 					const canClaim = RegionClient.ClaimRegion(baseRegion);
 					if (canClaim) {
 						ChatClient.PostFeedback(`You have selected Region ${baseRegion.Name}!`);
-						baseRegion.BrickColor = new BrickColor("Medium stone grey");
+						const tween = TweenService.Create(
+							baseRegion,
+							new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+							{ Color: new BrickColor("Medium stone grey").Color },
+						);
+						tween.Play();
 						const selectionBox = new Instance("SelectionBox");
 						selectionBox.Color3 = Color3.fromRGB(0, 255, 0);
 						selectionBox.LineThickness = 0.3;
