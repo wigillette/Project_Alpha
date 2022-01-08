@@ -124,33 +124,23 @@ const AssetService = Knit.CreateService({
 			const objectCFrame = Asset.GetPrimaryPartCFrame();
 			let currentAssetCFrame;
 			let minDist = 1000000;
+			let minIndex = 0;
 			let dist;
-			let chosenObject: { Name: string; Position: CFrame };
 			if (userAssetInfo && assetFolder) {
-				userAssetInfo.forEach((assetInfo) => {
-					currentAssetCFrame = assetInfo.Position.ToObjectSpace(Region.CFrame);
-					dist = currentAssetCFrame.Position.sub(objectCFrame.Position).Magnitude;
-					if (dist < minDist) {
-						minDist = dist;
-						chosenObject = assetInfo;
-					}
-				});
-
 				userAssetInfo.forEach((assetInfo, index) => {
 					currentAssetCFrame = assetInfo.Position.ToObjectSpace(Region.CFrame);
 					dist = currentAssetCFrame.Position.sub(objectCFrame.Position).Magnitude;
-					if (
-						assetInfo.Name === chosenObject.Name &&
-						assetInfo.Position === chosenObject.Position &&
-						dist === minDist
-					) {
-						Asset.Destroy();
-						userAssetInfo.remove(index);
-						this.PlayerAssets.set(Player, userAssetInfo);
-						this.UpdateAssetData(Player, userAssetInfo);
-						response = `${Player.Name} has successfully removed ${Asset.Name}`;
+					if (dist < minDist && assetInfo.Name === Asset.Name) {
+						minDist = dist;
+						minIndex = index;
 					}
 				});
+
+				Asset.Destroy();
+				userAssetInfo.remove(minIndex);
+				this.PlayerAssets.set(Player, userAssetInfo);
+				this.UpdateAssetData(Player, userAssetInfo);
+				response = `${Player.Name} has successfully removed ${Asset.Name}`;
 			}
 		}
 
