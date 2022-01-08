@@ -59,7 +59,7 @@ const AssetService = Knit.CreateService({
 							if (child.IsA("BasePart")) {
 								tween = TweenService.Create(
 									child as BasePart,
-									new TweenInfo(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
+									new TweenInfo(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0),
 									{ Transparency: (health.Value / objectInfo.Health) * -1 + 1 },
 								);
 								tween.Play();
@@ -120,23 +120,38 @@ const AssetService = Knit.CreateService({
 		let response = `Failed to remove the asset`;
 		const userAssetInfo = this.PlayerAssets.get(Player);
 		const assetFolder = this.RegionAssetsFolder.FindFirstChild(Region.Name);
-		if (userAssetInfo && assetFolder) {
-			userAssetInfo.forEach((assetInfo, index) => {
-				if (Asset && Asset.PrimaryPart) {
-					const objectCFrame = Asset.GetPrimaryPartCFrame().ToObjectSpace(Region.CFrame);
-					const roundedCFrame = new CFrame(objectCFrame.X, objectCFrame.Y, math.round(objectCFrame.Z));
-					if (assetInfo.Name === Asset.Name && assetInfo.Position.Position === roundedCFrame.Position) {
+		if (Asset && Asset.PrimaryPart) {
+			const objectCFrame = Asset.GetPrimaryPartCFrame();
+			let currentAssetCFrame;
+			let minDist = 1000000;
+			let dist;
+			let chosenObject: { Name: string; Position: CFrame };
+			if (userAssetInfo && assetFolder) {
+				userAssetInfo.forEach((assetInfo) => {
+					currentAssetCFrame = assetInfo.Position.ToObjectSpace(Region.CFrame);
+					dist = currentAssetCFrame.Position.sub(objectCFrame.Position).Magnitude;
+					if (dist < minDist) {
+						minDist = dist;
+						chosenObject = assetInfo;
+					}
+				});
+
+				userAssetInfo.forEach((assetInfo, index) => {
+					currentAssetCFrame = assetInfo.Position.ToObjectSpace(Region.CFrame);
+					dist = currentAssetCFrame.Position.sub(objectCFrame.Position).Magnitude;
+					if (
+						assetInfo.Name === chosenObject.Name &&
+						assetInfo.Position === chosenObject.Position &&
+						dist === minDist
+					) {
 						Asset.Destroy();
 						userAssetInfo.remove(index);
 						this.PlayerAssets.set(Player, userAssetInfo);
 						this.UpdateAssetData(Player, userAssetInfo);
 						response = `${Player.Name} has successfully removed ${Asset.Name}`;
-					} else {
-						print(assetInfo.Position.Position);
-						print(roundedCFrame.Position);
 					}
-				}
-			});
+				});
+			}
 		}
 
 		return response;
